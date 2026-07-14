@@ -1,0 +1,35 @@
+# --- build artifacts ---
+Debug/
+Release/
+*.o
+*.exe
+*.dll
+*.a
+gmon.out
+
+# --- Eclipse workspace metadata ---
+.metadata/
+.settings/
+RemoteSystemsTempFiles/
+
+# --- generated pulse / run files ---
+RAW*
+*-final.txt
+Cool
+Gate
+List
+last.lst
+last.scan
+*.log
+
+# --- data & archives (never commit experiment data) ---
+*.7z
+*.zip
+DDS-data-*/
+
+# --- OS / editor cruft ---
+.DS_Store
+._*
+Thumbs.db
+~$*
+*.pyc

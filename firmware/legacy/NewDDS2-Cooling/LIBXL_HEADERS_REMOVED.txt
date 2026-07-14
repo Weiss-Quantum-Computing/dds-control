@@ -1,0 +1,6 @@
+The commercial libxl headers (libxl.h, IBookT.h, ISheetT.h, IFormatT.h,
+IFontT.h, enum.h) were removed from this public repository for licensing
+reasons. They are only needed by the optional, disabled USE_EXCEL code
+path in getpulse.cpp; the default tab-delimited text-file build does not
+require them. To build the Excel path, obtain libxl from https://www.libxl.com
+and place its headers here.

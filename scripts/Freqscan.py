@@ -14,6 +14,7 @@ from scipy.optimize import fsolve  # solve for magnetic field by transition freq
 DelTempFiles = 1 # Clean up after we are done?
 
 # define some constants
+DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit for another install
 FilenameHead = 'Freqscan'   # filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
 print (FileComment)
@@ -87,7 +88,7 @@ if (HideBRCal==1):
 	    Calculate the microwave frequency for microwave transition.
 	    mF4 is the mf number for F= 4 state, likewise for mF3.
 	    """
-	    B = fsolve(get_b_field,1.39)
+	    B = B_field
 	    fuw = flevel(4, mF4, B) - flevel(3, mF3, B) - fmix
 	    
 	    return fuw
@@ -96,14 +97,14 @@ if (HideBRCal==1):
 	    """
 	    Calculate the microwave frequency for 2-photon transition.
 	    """
-	    B = fsolve(get_b_field,1.39)
+	    B = B_field
 	    fuw = flevel(4, 1, B) - flevel(3, 0, B) - fmix - delta2
 	    
 	    return fuw
 
 	def get_rf_freq():    
 	    
-	    B = fsolve(get_b_field,1.39)
+	    B = B_field
 	    frf = flevel(3, -1, B) - flevel(3, 0, B) - delta2
 	    
 	    return frf
@@ -114,6 +115,14 @@ if (HideBRCal==1):
 ##### initiated on 2018.02.02 #####
 ##### microwave horn rotated and powers updated on 2018.02.06#########
 fclock = 60006297.8708+0.4e3-0.17047265e3+0.2e3-0.140e3+0.215e3 + 0.72e3		# updated 20180806
+
+# Solve the Breit-Rabi B field once, up front, with a convergence check (Fix 2).
+B_field, _brinfo, _brier, _brmsg = fsolve(get_b_field, 1.39, full_output=True)
+if _brier != 1:
+    print('ERROR: B-field solve did not converge (ier=%d): %s' % (_brier, _brmsg))
+    print('Check that f4new (=%f) is correct.' % f4new)
+    sys.exit(1)
+print('Solved magnetic field B = %.4f G (from f4new)' % B_field[0])
 
 # Define frequency with f4new and  Hyperfine splitting (fclock)        #20230920
 f33to43new = get_uw_freq(-3,-3)[0]
@@ -428,8 +437,10 @@ FreqM1Z = fc+ 12e3   #	12.4e3-2e3  #8.5e3 # Hz, -1 sideband
 FreqM2Z = fc+ 25e3   #28.4e3-2e3  #19.1e3 # Hz, -2 sideband
 
 # calculate some stuff
-Frequency = np.arange(StartingFrequency, StoppingFrequency+FrequencyStepSize/2.0, \
-                      FrequencyStepSize) # in Hz
+if StartingFrequency == StoppingFrequency:
+	Frequency = np.array([StartingFrequency]) # single-point scan
+else:
+	Frequency = np.linspace(StartingFrequency, StoppingFrequency, NumberOfPoints) # exactly NumberOfPoints points
 
 NumberOfFiles = len(Frequency)
 
@@ -533,13 +544,19 @@ pulsefile.close() # Close the cooling pulse file
 
 os.system('copy '+Coolfilename+' Gate')
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
-subprocess.call(['C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal-V2.exe', 'Gate'])
+rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal-V2.exe'), 'Gate'])
+if rc != 0:
+    print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal-V2.exe) failed with exit %d. Aborting.' % rc)
+    sys.exit(1)
 print('After making Cool')
 
 # begin loop to write the detection pulse files    
 measfile = open(MeasListFilename, "wb")                  
 measfile.write(FileComment)                  
 writerm = csv.writer(measfile, dialect='excel-tab')
+def writerow_both(row):  # write one pulse row to both the point pulse file and the meas log
+    writer.writerow(row)
+    writerm.writerow(row)
 for i in xrange(0,len(Frequency)):
 #~ for i in xrange(0,len(Phase)):
     print('Making pulsefile '+Filenames[i])
@@ -586,42 +603,15 @@ for i in xrange(0,len(Frequency)):
 	#~ writerm.writerow([f3P2to4P3newH, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])
 	#~ writerm.writerow([f4P1to3P2newH, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
 	
-    for x in xrange(0,DetRepeats):
-	for y in xrange(0,n):
-		writer.writerow([Frequency[i], \
-                        DetectionPulseHSR, \
-                        DetectionPulseLength, \
-                        DetectionPulsePower, \
-                        DetectionPulseType, \
-                        'Measure'])
-	#~ writer.writerow([f33to42new, -6e3, 3.0, P33to42new*64/36, 1, '3,-3 -> 4,-2']) 
-	#~ writer.writerow([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1']) 
-	#~ writer.writerow([f33to42new, -8e3, 3.0, P33to42new*64/36, 1, '3,-3 -> 4,-2']) 
-	#~ writer.writerow([f31to40new, -6e3, 3.0, P31to40new*4, 1, '3,-1 -> 4,0'])
-	#~ writer.writerow([f42to31new, -6e3, 3.0, P42to31new*4, 1, '4,-2 -> 3,-1']) 
-	#~ writer.writerow([f31to40new, -6e3, 3.0, P31to40new*4, 1, '3,-1 -> 4,0'])
-	#~ writer.writerow([f4P1to3P2new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
-	#~ writer.writerow([f3P2to4P3new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '3,2 -> 4,3'])
-	#~ writer.writerow([f4P1to3P2new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
-			
-	pulsefile.close() # Close the pulse file
-    writerm.writerow([Filenames[i]])
-    for x in xrange(0,DetRepeats):
-	for y in xrange(0,n):
-		writerm.writerow([Frequency[i], \
-                        DetectionPulseHSR, \
-                        DetectionPulseLength, \
-                        DetectionPulsePower, \
-                        DetectionPulseType, \
-                         'Measure'])
-	#~ writerm.writerow([f33to42new, -8e3, 3.0, P33to42new*64/36, 1, '3,-3 -> 4,-2']) 
-	#~ writerm.writerow([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1']) 
-	#~ writerm.writerow([f33to42new, -8e3, 3.0, P33to42new*64/36, 1, '3,-3 -> 4,-2']) 
-	#~ writerm.writerow([f31to40new, -8e3, 3.0, P31to40new*64/36, 1, '3,-1 -> 4,0'])
-	#~ writerm.writerow([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1']) 
-	#~ writerm.writerow([f3P2to4P3new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '3,2 -> 4,3'])
-	#~ writerm.writerow([f4P1to3P2new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
-	#~ writerm.writerow([f3P2to4P3new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '3,2 -> 4,3'])
+    writerm.writerow([Filenames[i]])  # meas-log header: which point file these rows belong to
+    for x in xrange(0, DetRepeats):
+        for y in xrange(0, n):
+            writerow_both([Frequency[i], DetectionPulseHSR, DetectionPulseLength, \
+                           DetectionPulsePower, DetectionPulseType, 'Measure'])
+    pulsefile.close() # Close the pulse file
+    # To add fixed post-detection pulses, use writerow_both so the pulse file and meas log stay in sync, e.g.:
+    #~ writerow_both([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1'])
+    #~ writerow_both([f3P2to4P3new, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])
 
 measfile.close()      
 
@@ -643,7 +633,10 @@ scanfile.close()
 
 
 #print('Current directory: '+os.getcwd())
-subprocess.call(["C:\Users\Yang\Documents\Data\DDScontrol\stepDDS_cal3-V2.bat", "List"])
+rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3-V2.bat'), 'List'])
+if rc != 0:
+    print('ERROR: stepDDS_cal3-V2.bat failed with exit %d. Aborting.' % rc)
+    sys.exit(1)
 #print('After batch file')
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_copy.bat List")
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")

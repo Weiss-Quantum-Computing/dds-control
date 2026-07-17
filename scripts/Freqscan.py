@@ -72,7 +72,8 @@ if (HideBRCal==1):
 			eqn = fhfs*(-1.0/16.0 + mf*gI*muB*B/fhfs - \
 				1.0/2.0 * math.sqrt(1 + 4 * mf * (gJ - gI) * muB * B/(8*fhfs) +\
 					     ((gJ-gI) * muB * B / fhfs)**2))
-		else: print('wrong F number!')
+		else:
+			raise ValueError('flevel: F must be 3 or 4, got %r' % (F,))
 	    
 		return eqn
 
@@ -109,37 +110,37 @@ if (HideBRCal==1):
 	    
 		return frf
 
-		####################################
-	 
+####################################
 
-		##### initiated on 2018.02.02 #####
-		##### microwave horn rotated and powers updated on 2018.02.06#########
+##### initiated on 2018.02.02 #####
+##### microwave horn rotated and powers updated on 2018.02.06 #####
 fclock = 60006297.8708+0.4e3-0.17047265e3+0.2e3-0.140e3+0.215e3 + 0.72e3		# updated 20180806
 
 # Solve the Breit-Rabi B field once, up front, with a convergence check (Fix 2).
-B_field, _brinfo, _brier, _brmsg = fsolve(get_b_field, 1.39, full_output=True)
+B_field, _brinfo, _brier, _brmsg = fsolve(get_b_field, b_trial, full_output=True)
 if _brier != 1:
 	print('ERROR: B-field solve did not converge (ier=%d): %s' % (_brier, _brmsg))
 	print('Check that f4new (=%f) is correct.' % f4new)
 	sys.exit(1)
-print('Solved magnetic field B = %.4f G (from f4new)' % B_field[0])
+B_field = B_field[0]	# scalar, so flevel's math.sqrt works on any NumPy version
+print('Solved magnetic field B = %.4f G (from f4new)' % B_field)
 
 # Define frequency with f4new and  Hyperfine splitting (fclock)        #20230920
-f33to43new = get_uw_freq(-3,-3)[0]
-f43to32new = get_uw_freq(-3,-2)[0]
-f32to41new = get_uw_freq(-1,-2)[0] - 100
-f41to30new = get_uw_freq(-1,-0)[0]
-f40to3P1new = get_uw_freq(0,1)[0]
-f3P1to4P1new = get_uw_freq(1,1)[0] - 110
-f4P1to3P2new = get_uw_freq(1,2)[0]
-f3P2to4P3new = get_uw_freq(3,2)[0]
-f3P2to4P2new = get_uw_freq(2,2)[0]
-f4P3to3P3new = get_uw_freq(3,3)[0]
+f33to43new = get_uw_freq(-3,-3)
+f43to32new = get_uw_freq(-3,-2)
+f32to41new = get_uw_freq(-1,-2) - 100
+f41to30new = get_uw_freq(-1,-0)
+f40to3P1new = get_uw_freq(0,1)
+f3P1to4P1new = get_uw_freq(1,1) - 110
+f4P1to3P2new = get_uw_freq(1,2)
+f3P2to4P3new = get_uw_freq(3,2)
+f3P2to4P2new = get_uw_freq(2,2)
+f4P3to3P3new = get_uw_freq(3,3)
 
-f33to42new = get_uw_freq(-2,-3)[0]  - 100
-f42to31new = get_uw_freq(-2,-1)[0]  
-f31to40new = get_uw_freq(0,-1)[0]
-f31to41new = get_uw_freq(-1,-1)[0]
+f33to42new = get_uw_freq(-2,-3)  - 100
+f42to31new = get_uw_freq(-2,-1)
+f31to40new = get_uw_freq(0,-1)
+f31to41new = get_uw_freq(-1,-1)
 
 #~ f31to40newH = (fclock-f4newH)*6/7+f4newH  # Definition value
 #~ f31to40newH =f4newH +2.92797e6                           # theoretical value under the high field
@@ -309,12 +310,6 @@ DetRepeats =1	# how many detection pulse do you want to repeat, including pulses
 ##################################################
 ### CLOCK TRANSITION FREQ: 60.0068MHz ############
 ##################################################
-
-if StartingFrequency == StoppingFrequency:
-	FrequencyStepSize = 1e3
-else:
-	FrequencyStepSize = (StoppingFrequency - StartingFrequency)/(NumberOfPoints-1)			 
-
 
 NumberOfRepeats		= 1000		# Number of times to repeat the scan
 
@@ -542,7 +537,10 @@ if DoDummy == 1:
 
 pulsefile.close() # Close the cooling pulse file
 
-os.system('copy '+Coolfilename+' Gate')
+rc = os.system('copy '+Coolfilename+' Gate')
+if rc != 0:
+	print('ERROR: copy %s -> Gate failed with exit %d. Aborting.' % (Coolfilename, rc))
+	sys.exit(1)
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
 rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal-V2.exe'), 'Gate'])
 if rc != 0:
@@ -554,8 +552,8 @@ print('After making Cool')
 measfile = open(MeasListFilename, "wb")                  
 measfile.write(FileComment)                  
 writerm = csv.writer(measfile, dialect='excel-tab')
-def writerow_both(row):  # write one pulse row to both the point pulse file and the meas log
-	writer.writerow(row)
+def writerow_both(w, row):  # write one pulse row to both the given pulse file writer and the meas log
+	w.writerow(row)
 	writerm.writerow(row)
 for i in xrange(0,len(Frequency)):
 #~ for i in xrange(0,len(Phase)):
@@ -604,14 +602,27 @@ for i in xrange(0,len(Frequency)):
 	#~ writerm.writerow([f4P1to3P2newH, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
 	
 	writerm.writerow([Filenames[i]])  # meas-log header: which point file these rows belong to
+
+	##### PRE-PULSES: insert fixed pulses BEFORE the scanned pulse here #####
+	# Written once per file; NOT repeated by n or DetRepeats.
+	# Use writerow_both(writer, ...) so the pulse file and the meas log stay in sync. Example:
+	#~ writerow_both(writer, [f33to43new, -8e3, 3.0, P33to43new*64/36, 1, '3,-3 -> 4,-3'])
+	##### END PRE-PULSES #####
+
 	for x in xrange(0, DetRepeats):
 		for y in xrange(0, n):
-			writerow_both([Frequency[i], DetectionPulseHSR, DetectionPulseLength, \
+			writerow_both(writer, [Frequency[i], DetectionPulseHSR, DetectionPulseLength, \
                            DetectionPulsePower, DetectionPulseType, 'Measure'])
+
+		##### POST-PULSES: insert fixed pulses AFTER the scanned pulse here #####
+		# Inside the DetRepeats loop, so these repeat with each detection block
+		# (matches the DetRepeats comment: "including pulses after relevant one").
+		# Move this block one tab left (outside the x loop) to write them only once per file.
+		#~ writerow_both(writer, [f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1'])
+		#~ writerow_both(writer, [f3P2to4P3new, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])
+		##### END POST-PULSES #####
+
 	pulsefile.close() # Close the pulse file
-	# To add fixed post-detection pulses, use writerow_both so the pulse file and meas log stay in sync, e.g.:
-	#~ writerow_both([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1'])
-	#~ writerow_both([f3P2to4P3new, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])
 
 measfile.close()      
 
@@ -642,7 +653,7 @@ if rc != 0:
 	#os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")
 	#os.system("del Cool List RAWCool")
 if DelTempFiles == 1 :
-	os.system("del Cool List reset")	
+	os.system("del "+Coolfilename+" Gate List reset")
 
 listfile = open(ListFilename, "wb")
 for j in xrange(0,NumberOfRepeats):

@@ -54,7 +54,7 @@ fmix = 9.1326249676e9
 HideBRCal=1
 if (HideBRCal==1):
 	def flevel(F,mf,B):
-	    """
+		"""
 	    Parameters
 	    ----------
 	    mF : Hyerfine sublevel
@@ -65,63 +65,63 @@ if (HideBRCal==1):
 	    The energy level as function of magnetic field
 	    -------
 	    """
-	    if F == 4:
-		    eqn = fhfs * ( -1.0/16.0 + mf * gI * muB * B/fhfs + \
+		if F == 4:
+			eqn = fhfs * ( -1.0/16.0 + mf * gI * muB * B/fhfs + \
 		    1.0/2.0 * math.sqrt(1 + 4 * mf * (gJ - gI) * muB * B/(8*fhfs) + ( (gJ-gI) * muB * B / fhfs)**2))
-	    elif F == 3:
-		    eqn = fhfs*(-1.0/16.0 + mf*gI*muB*B/fhfs - \
+		elif F == 3:
+			eqn = fhfs*(-1.0/16.0 + mf*gI*muB*B/fhfs - \
 				1.0/2.0 * math.sqrt(1 + 4 * mf * (gJ - gI) * muB * B/(8*fhfs) +\
 					     ((gJ-gI) * muB * B / fhfs)**2))
-	    else: print('wrong F number!')
+		else: print('wrong F number!')
 	    
-	    return eqn
+		return eqn
 
 	def get_b_field(z):
 
-	    B = z[0]
-	    F = np.empty((1))
-	    F[0] = flevel(4, -4, B) - flevel(3, -3, B) - f4new - fmix 
+		B = z[0]
+		F = np.empty((1))
+		F[0] = flevel(4, -4, B) - flevel(3, -3, B) - f4new - fmix 
 	   
-	    return F
+		return F
 	def get_uw_freq(mF4, mF3):    
-	    """
+		"""
 	    Calculate the microwave frequency for microwave transition.
 	    mF4 is the mf number for F= 4 state, likewise for mF3.
 	    """
-	    B = B_field
-	    fuw = flevel(4, mF4, B) - flevel(3, mF3, B) - fmix
+		B = B_field
+		fuw = flevel(4, mF4, B) - flevel(3, mF3, B) - fmix
 	    
-	    return fuw
+		return fuw
 	    
 	def get_uw_freq2():    
-	    """
+		"""
 	    Calculate the microwave frequency for 2-photon transition.
 	    """
-	    B = B_field
-	    fuw = flevel(4, 1, B) - flevel(3, 0, B) - fmix - delta2
+		B = B_field
+		fuw = flevel(4, 1, B) - flevel(3, 0, B) - fmix - delta2
 	    
-	    return fuw
+		return fuw
 
 	def get_rf_freq():    
 	    
-	    B = B_field
-	    frf = flevel(3, -1, B) - flevel(3, 0, B) - delta2
+		B = B_field
+		frf = flevel(3, -1, B) - flevel(3, 0, B) - delta2
 	    
-	    return frf
+		return frf
 
-	####################################
+		####################################
 	 
 
-##### initiated on 2018.02.02 #####
-##### microwave horn rotated and powers updated on 2018.02.06#########
+		##### initiated on 2018.02.02 #####
+		##### microwave horn rotated and powers updated on 2018.02.06#########
 fclock = 60006297.8708+0.4e3-0.17047265e3+0.2e3-0.140e3+0.215e3 + 0.72e3		# updated 20180806
 
 # Solve the Breit-Rabi B field once, up front, with a convergence check (Fix 2).
 B_field, _brinfo, _brier, _brmsg = fsolve(get_b_field, 1.39, full_output=True)
 if _brier != 1:
-    print('ERROR: B-field solve did not converge (ier=%d): %s' % (_brier, _brmsg))
-    print('Check that f4new (=%f) is correct.' % f4new)
-    sys.exit(1)
+	print('ERROR: B-field solve did not converge (ier=%d): %s' % (_brier, _brmsg))
+	print('Check that f4new (=%f) is correct.' % f4new)
+	sys.exit(1)
 print('Solved magnetic field B = %.4f G (from f4new)' % B_field[0])
 
 # Define frequency with f4new and  Hyperfine splitting (fclock)        #20230920
@@ -450,7 +450,7 @@ NumberOfFiles = len(Frequency)
 # Generate file names
 Filenames = range(0,NumberOfFiles)
 for i in xrange(0,NumberOfFiles):
-    Filenames[i] = FilenameHead + '-%03d'% (i+1) # +'.txt'
+	Filenames[i] = FilenameHead + '-%03d'% (i+1) # +'.txt'
 Coolfilename = FilenameHead+'-Cool'
 MeasListFilename = FilenameHead+'-Meas'
 ScanFilename = FilenameHead+'.scan'
@@ -467,78 +467,78 @@ writer = csv.writer(pulsefile, dialect='excel-tab') # define the file format
 if DoDummy == 1:
 	writer.writerow([58.0e6, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
 
-#~ writer.writerow([f42to31newH, 0, 1.2, 3.0, 3, '4,-2 -> 3,-1']) 
+	#~ writer.writerow([f42to31newH, 0, 1.2, 3.0, 3, '4,-2 -> 3,-1']) 
 
-##### initiated 2018.02.02 #####
-#~ writer.writerow([f4new, -8e3, 3.0, 0.16*64/36, 1, '4,-4 -> 3,-3']) 
-#~ writer.writerow([f4new, -6e3, 3.0, P44to33new*50/16, 1, '4,-4 -> 3,-3']) 
-#~ writer.writerow([f4new-19e3, -4e3, 3.0, 0.04, 1, '4,-4 -> 3,-3'])  # used for clearing X  hotter atoms
-#~ writer.writerow([f4new-17e3, -4e3, 3.0, 0.04, 1, '4,-4 -> 3,-3'])  # used for clearing Y hotter atoms
-#~ writer.writerow([f4new-13e3, -4e3, 3.0, 0.04, 1, '4,-4 -> 3,-3'])  # used for clearing Z hotter atoms
-#~ writer.writerow([f33to43new, -8e3, 3.0, P33to43new*64/36, 1, '3,-3 -> 4,-3']) 
-#~ writer.writerow([f43to32new, -6e3, 3.0, P43to32new, 1, '4,-3 -> 3,-2']) 
-#~ writer.writerow([f32to41new, -6e3, 3.0, P32to41new, 1, '3,-2 -> 4,-1']) 
+	##### initiated 2018.02.02 #####
+	#~ writer.writerow([f4new, -8e3, 3.0, 0.16*64/36, 1, '4,-4 -> 3,-3']) 
+	#~ writer.writerow([f4new, -6e3, 3.0, P44to33new*50/16, 1, '4,-4 -> 3,-3']) 
+	#~ writer.writerow([f4new-19e3, -4e3, 3.0, 0.04, 1, '4,-4 -> 3,-3'])  # used for clearing X  hotter atoms
+	#~ writer.writerow([f4new-17e3, -4e3, 3.0, 0.04, 1, '4,-4 -> 3,-3'])  # used for clearing Y hotter atoms
+	#~ writer.writerow([f4new-13e3, -4e3, 3.0, 0.04, 1, '4,-4 -> 3,-3'])  # used for clearing Z hotter atoms
+	#~ writer.writerow([f33to43new, -8e3, 3.0, P33to43new*64/36, 1, '3,-3 -> 4,-3']) 
+	#~ writer.writerow([f43to32new, -6e3, 3.0, P43to32new, 1, '4,-3 -> 3,-2']) 
+	#~ writer.writerow([f32to41new, -6e3, 3.0, P32to41new, 1, '3,-2 -> 4,-1']) 
 
-#~ writer.writerow([58.0e6, 0.0, 3.0, 0., 1, 'Dummy']) # Dummy pulse
-#~ writer.writerow([f33to42new, -6e3, 3.0, P33to42new*36/16, 1, '3,-3 -> 4,-2']) 
-#~ writer.writerow([f42to31new, -6e3, 3.0, P42to31new*36/16, 1, '4,-2 -> 3,-1'])
-#~ writer.writerow([Frequency0, 0, 0.8, 0.318*14, 3, '3,-1 -> 4,1']) #for square 2-photon 
-#~ writer.writerow([f31to40new, -6e3, 3.0, P31to40new*36/16, 1, '3,-1 -> 4,0'])
-#~ writer.writerow([f40to3P1new, -8e3, 3.0, P40to3P1new*64/36, 1, '4,0 -> 3,1'])
-#~ writer.writerow([f3P1to4P1new, -8e3, 3.0, P3P1to4P1new*64/36, 1, '3,1 -> 4,1'])
-#~ writer.writerow([f4P1to3P2new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
-#~ writer.writerow([f3P2to4P3new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
-#~ writer.writerow([f4P3to3P3new, -8e3, 3.0, P33to43new*64/36, 1, '4,1 -> 3,2'])
-#~ writer.writerow([fclock,		-8e3, 3.0, Pclock*64/36, 	 1, '4,0 -> 3,0']) 
-#~ writer.writerow([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1']) 
-#~ writer.writerow([f4new, 	-8e3, 3.0, 0.038*64/36, 1, '4,-4 -> 3,-3']) 
+	#~ writer.writerow([58.0e6, 0.0, 3.0, 0., 1, 'Dummy']) # Dummy pulse
+	#~ writer.writerow([f33to42new, -6e3, 3.0, P33to42new*36/16, 1, '3,-3 -> 4,-2']) 
+	#~ writer.writerow([f42to31new, -6e3, 3.0, P42to31new*36/16, 1, '4,-2 -> 3,-1'])
+	#~ writer.writerow([Frequency0, 0, 0.8, 0.318*14, 3, '3,-1 -> 4,1']) #for square 2-photon 
+	#~ writer.writerow([f31to40new, -6e3, 3.0, P31to40new*36/16, 1, '3,-1 -> 4,0'])
+	#~ writer.writerow([f40to3P1new, -8e3, 3.0, P40to3P1new*64/36, 1, '4,0 -> 3,1'])
+	#~ writer.writerow([f3P1to4P1new, -8e3, 3.0, P3P1to4P1new*64/36, 1, '3,1 -> 4,1'])
+	#~ writer.writerow([f4P1to3P2new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
+	#~ writer.writerow([f3P2to4P3new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
+	#~ writer.writerow([f4P3to3P3new, -8e3, 3.0, P33to43new*64/36, 1, '4,1 -> 3,2'])
+	#~ writer.writerow([fclock,		-8e3, 3.0, Pclock*64/36, 	 1, '4,0 -> 3,0']) 
+	#~ writer.writerow([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1']) 
+	#~ writer.writerow([f4new, 	-8e3, 3.0, 0.038*64/36, 1, '4,-4 -> 3,-3']) 
 
-#~ writer.writerow([fclock,		0, 0.06, Pclock_Pi_120us, 	 2, '4,0 -> 3,0']) 
-#~ writer.writerow([f41to30new, -8e3, 3.0, P41to30new*64/36, 1, '3,0-> 4,-1'])
-#~ writer.writerow([f42to31new, -6e3, 3.0, 0.169, 1, '3,-1 -> 4,-2']) 
-#~ writer.writerow([f40to3P1new, 0, 0.12,0.82, 2, '4,1 -> 3,2'])
+	#~ writer.writerow([fclock,		0, 0.06, Pclock_Pi_120us, 	 2, '4,0 -> 3,0']) 
+	#~ writer.writerow([f41to30new, -8e3, 3.0, P41to30new*64/36, 1, '3,0-> 4,-1'])
+	#~ writer.writerow([f42to31new, -6e3, 3.0, 0.169, 1, '3,-1 -> 4,-2']) 
+	#~ writer.writerow([f40to3P1new, 0, 0.12,0.82, 2, '4,1 -> 3,2'])
 
-# DDS test
-#~ writer.writerow([f4new, 0, 0.12, 1, 3, '4,-4 -> 3,-3']) 
-#~ writer.writerow([f4new, 0, 0.12, 1, 3, '4,-4 -> 3,-3']) 
-#~ writer.writerow([f4new, -8e3, 3.0, 0.16*64/36, 1, '4,-4 -> 3,-3']) 
-##### initiated 2018.02.02 #####
+	# DDS test
+	#~ writer.writerow([f4new, 0, 0.12, 1, 3, '4,-4 -> 3,-3']) 
+	#~ writer.writerow([f4new, 0, 0.12, 1, 3, '4,-4 -> 3,-3']) 
+	#~ writer.writerow([f4new, -8e3, 3.0, 0.16*64/36, 1, '4,-4 -> 3,-3']) 
+	##### initiated 2018.02.02 #####
 
 
-#~ P = 0.0
-#~ writer.writerow([f4new, -8000, 3, 0.1,  1, '4,4->3,3'])
-#~ for i in range(0,9):
+	#~ P = 0.0
+	#~ writer.writerow([f4new, -8000, 3, 0.1,  1, '4,4->3,3'])
+	#~ for i in range(0,9):
 	#~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3']) # 2014.10.10, old power is 0.05W 
 	#~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3'])
-#~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3'])
-#~ writer.writerow([f4new, -8000, 3, P,  1, '4,4->3,3'])
-#~ writer.writerow([f2p, -6000, 3, 1.6*1.5*0.7,  1, '3,3->4,2']) # 2014.10.10: 1.5W 
-#~ writer.writerow([f1p, -6000, 3, 1.6*0.3*0.7,  1, '4,2->3,1']) # 2014.10.10: 0.8W 
-#~ writer.writerow([f0p, -6000, 3, 1.6*0.25*0.7,  1, '3,1->4,0']) # 2014.10.10: 025W 
+	#~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3'])
+	#~ writer.writerow([f4new, -8000, 3, P,  1, '4,4->3,3'])
+	#~ writer.writerow([f2p, -6000, 3, 1.6*1.5*0.7,  1, '3,3->4,2']) # 2014.10.10: 1.5W 
+	#~ writer.writerow([f1p, -6000, 3, 1.6*0.3*0.7,  1, '4,2->3,1']) # 2014.10.10: 0.8W 
+	#~ writer.writerow([f0p, -6000, 3, 1.6*0.25*0.7,  1, '3,1->4,0']) # 2014.10.10: 025W 
 
 
-#~ writer.writerow([fclock,0, 0.12,0,  2, 'dummy']) # 2014.10.10: 025W 
+	#~ writer.writerow([fclock,0, 0.12,0,  2, 'dummy']) # 2014.10.10: 025W 
 
-#~ for i in range(0,129):
-	 #~ writer.writerow([fclock, 0, 0.03, P3040_30us_Pi_Square,  3, 'PI'])
+	#~ for i in range(0,129):
+	#~ writer.writerow([fclock, 0, 0.03, P3040_30us_Pi_Square,  3, 'PI'])
 
-#~ writer.writerow([fclock+dfZeeman, 0, 0.24, P304P1_240us,  2, 'test'])
-#~ writer.writerow([fclock, -6000, 3, 1.6*0.7,  1, '3,0->4,0'])
+	#~ writer.writerow([fclock+dfZeeman, 0, 0.24, P304P1_240us,  2, 'test'])
+	#~ writer.writerow([fclock, -6000, 3, 1.6*0.7,  1, '3,0->4,0'])
 
-#20251212
-#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
-#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
-#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
-#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
-#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
-#~ writer.writerow([f4new-20e3, -4e3, 3.0, 0.16, 1, '3,-3 -> 4,-4 X-cooling-sideband'])
-#~ writer.writerow([f4new-16e3, -4e3, 3.0, 0.16, 1, '3,-3 -> 4,-4 Y-cooling-sideband'])
-#~ writer.writerow([f4new-12.5e3, -4e3, 3.0, 0.16, 1, '3,-3 -> 4,-4 Z-cooling-sideband'])
-#~ writer.writerow([f4new, -4e3, 3.0, 0*0.08, 1, '4,-4 -> 3,-3'])
-#~ writer.writerow([f4new-20e3, -4e3, 3.0, 0*0.16, 1, '3,-3 -> 4,-4 X-cooling-sideband'])
-#~ writer.writerow([f4new-20e3, -4e3, 3.0, 0*0.16, 1, '3,-3 -> 4,-4 X-cooling-sideband'])
-#~ writer.writerow([f4new-20e3, -4e3, 3.0, 0.16, 1, '3,-3 -> 4,-4 X-cooling-sideband'])
-#~ writer.writerow([f33to43new, -4e3, 3.0, 0*0.16, 1, '3,-3 -> 4,-3'])
+	#20251212
+	#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
+	#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
+	#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
+	#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
+	#~ writer.writerow([f4new, -4e3, 3.0, 0.08, 1, '4,-4 -> 3,-3'])
+	#~ writer.writerow([f4new-20e3, -4e3, 3.0, 0.16, 1, '3,-3 -> 4,-4 X-cooling-sideband'])
+	#~ writer.writerow([f4new-16e3, -4e3, 3.0, 0.16, 1, '3,-3 -> 4,-4 Y-cooling-sideband'])
+	#~ writer.writerow([f4new-12.5e3, -4e3, 3.0, 0.16, 1, '3,-3 -> 4,-4 Z-cooling-sideband'])
+	#~ writer.writerow([f4new, -4e3, 3.0, 0*0.08, 1, '4,-4 -> 3,-3'])
+	#~ writer.writerow([f4new-20e3, -4e3, 3.0, 0*0.16, 1, '3,-3 -> 4,-4 X-cooling-sideband'])
+	#~ writer.writerow([f4new-20e3, -4e3, 3.0, 0*0.16, 1, '3,-3 -> 4,-4 X-cooling-sideband'])
+	#~ writer.writerow([f4new-20e3, -4e3, 3.0, 0.16, 1, '3,-3 -> 4,-4 X-cooling-sideband'])
+	#~ writer.writerow([f33to43new, -4e3, 3.0, 0*0.16, 1, '3,-3 -> 4,-3'])
 
 pulsefile.close() # Close the cooling pulse file
 
@@ -546,8 +546,8 @@ os.system('copy '+Coolfilename+' Gate')
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
 rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal-V2.exe'), 'Gate'])
 if rc != 0:
-    print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal-V2.exe) failed with exit %d. Aborting.' % rc)
-    sys.exit(1)
+	print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal-V2.exe) failed with exit %d. Aborting.' % rc)
+	sys.exit(1)
 print('After making Cool')
 
 # begin loop to write the detection pulse files    
@@ -555,63 +555,63 @@ measfile = open(MeasListFilename, "wb")
 measfile.write(FileComment)                  
 writerm = csv.writer(measfile, dialect='excel-tab')
 def writerow_both(row):  # write one pulse row to both the point pulse file and the meas log
-    writer.writerow(row)
-    writerm.writerow(row)
+	writer.writerow(row)
+	writerm.writerow(row)
 for i in xrange(0,len(Frequency)):
 #~ for i in xrange(0,len(Phase)):
-    print('Making pulsefile '+Filenames[i])
-    pulsefile = open(Filenames[i], "wb") # open pulse file
-    pulsefile.write(FileComment) # write comment line
-    writer = csv.writer(pulsefile, dialect='excel-tab') # define the file format
+	print('Making pulsefile '+Filenames[i])
+	pulsefile = open(Filenames[i], "wb") # open pulse file
+	pulsefile.write(FileComment) # write comment line
+	writer = csv.writer(pulsefile, dialect='excel-tab') # define the file format
 
-    #~ # Measurement pulse
-    #~ writer.writerow([StartingFrequency, \
-                    #~ Phase[i], \ 
-                    #~ DetectionPulseLength, \
-                    #~ DetectionPulsePower, \
-                    #~ DetectionPulseType, \
-                    #~ 'Measure'])
-    #~ pulsefile.close() # Close the pulse file
-    #~ writerm.writerow([Filenames[i]])
-    #~ writerm.writerow([StartingFrequency, \
-                    #~ Phase[i], \
-                    #~ DetectionPulseLength, \
-                    #~ DetectionPulsePower, \
-                    #~ DetectionPulseType, \
-                    #~ 'Measure'])
-    #~ writer.writerow([Frequency[i], 0.0, 7*0.04, 0.27, 2, 'Pi/2'])
-    #~ writer.writerow([Frequency[i], 1.0, 5*0.04, 0.27, 2, 'Pi'])
+	#~ # Measurement pulse
+	#~ writer.writerow([StartingFrequency, \
+	#~ Phase[i], \ 
+	#~ DetectionPulseLength, \
+	#~ DetectionPulsePower, \
+	#~ DetectionPulseType, \
+	#~ 'Measure'])
+	#~ pulsefile.close() # Close the pulse file
+	#~ writerm.writerow([Filenames[i]])
+	#~ writerm.writerow([StartingFrequency, \
+	#~ Phase[i], \
+	#~ DetectionPulseLength, \
+	#~ DetectionPulsePower, \
+	#~ DetectionPulseType, \
+	#~ 'Measure'])
+	#~ writer.writerow([Frequency[i], 0.0, 7*0.04, 0.27, 2, 'Pi/2'])
+	#~ writer.writerow([Frequency[i], 1.0, 5*0.04, 0.27, 2, 'Pi'])
     
-    #~ for x in xrange(0,DetRepeats):
-        #~ writer.writerow([Frequency[i], \
-                        #~ DetectionPulseHSR, \
-                        #~ DetectionPulseLength, \
-                        #~ DetectionPulsePower, \
-                        #~ DetectionPulseType, \
-                        #~ 'Measure'])
+	#~ for x in xrange(0,DetRepeats):
+	#~ writer.writerow([Frequency[i], \
+	#~ DetectionPulseHSR, \
+	#~ DetectionPulseLength, \
+	#~ DetectionPulsePower, \
+	#~ DetectionPulseType, \
+	#~ 'Measure'])
 	#~ writer.writerow([f3P2to4P3new, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])
 	#~ writer.writerow([f4P1to3P2new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
-    #~ pulsefile.close() # Close the pulse file
-    #~ writerm.writerow([Filenames[i]])
-    #~ for x in xrange(0,DetRepeats):
-        #~ writerm.writerow([Frequency[i], \
-                        #~ DetectionPulseHSR, \
-                        #~ DetectionPulseLength, \
-                        #~ DetectionPulsePower, \
-                        #~ DetectionPulseType, \
-                         #~ 'Measure'])
+	#~ pulsefile.close() # Close the pulse file
+	#~ writerm.writerow([Filenames[i]])
+	#~ for x in xrange(0,DetRepeats):
+	#~ writerm.writerow([Frequency[i], \
+	#~ DetectionPulseHSR, \
+	#~ DetectionPulseLength, \
+	#~ DetectionPulsePower, \
+	#~ DetectionPulseType, \
+	#~ 'Measure'])
 	#~ writerm.writerow([f3P2to4P3newH, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])
 	#~ writerm.writerow([f4P1to3P2newH, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
 	
-    writerm.writerow([Filenames[i]])  # meas-log header: which point file these rows belong to
-    for x in xrange(0, DetRepeats):
-        for y in xrange(0, n):
-            writerow_both([Frequency[i], DetectionPulseHSR, DetectionPulseLength, \
+	writerm.writerow([Filenames[i]])  # meas-log header: which point file these rows belong to
+	for x in xrange(0, DetRepeats):
+		for y in xrange(0, n):
+			writerow_both([Frequency[i], DetectionPulseHSR, DetectionPulseLength, \
                            DetectionPulsePower, DetectionPulseType, 'Measure'])
-    pulsefile.close() # Close the pulse file
-    # To add fixed post-detection pulses, use writerow_both so the pulse file and meas log stay in sync, e.g.:
-    #~ writerow_both([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1'])
-    #~ writerow_both([f3P2to4P3new, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])
+	pulsefile.close() # Close the pulse file
+	# To add fixed post-detection pulses, use writerow_both so the pulse file and meas log stay in sync, e.g.:
+	#~ writerow_both([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1'])
+	#~ writerow_both([f3P2to4P3new, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])
 
 measfile.close()      
 
@@ -621,7 +621,7 @@ measfile.close()
 # Write list file
 listfile = open('List', "wb")
 for i in Filenames:
-    listfile.write(i+'\n')
+	listfile.write(i+'\n')
 listfile.close()
 
 # Write scan file
@@ -635,19 +635,19 @@ scanfile.close()
 #print('Current directory: '+os.getcwd())
 rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3-V2.bat'), 'List'])
 if rc != 0:
-    print('ERROR: stepDDS_cal3-V2.bat failed with exit %d. Aborting.' % rc)
-    sys.exit(1)
-#print('After batch file')
-#os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_copy.bat List")
-#os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")
-#os.system("del Cool List RAWCool")
+	print('ERROR: stepDDS_cal3-V2.bat failed with exit %d. Aborting.' % rc)
+	sys.exit(1)
+	#print('After batch file')
+	#os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_copy.bat List")
+	#os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")
+	#os.system("del Cool List RAWCool")
 if DelTempFiles == 1 :
 	os.system("del Cool List reset")	
 
 listfile = open(ListFilename, "wb")
 for j in xrange(0,NumberOfRepeats):
-    for i in Filenames:
-        listfile.write(i+'-final.txt\n')
+	for i in Filenames:
+		listfile.write(i+'-final.txt\n')
 listfile.close()                 
             
 print("%d files"%(NumberOfFiles))

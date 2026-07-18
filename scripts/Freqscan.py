@@ -40,75 +40,76 @@ print('f4new (4,-4 -> 3,-3 transition) = %.1f Hz' % f4new)
 #~ f4new = 58661697.8708+1.2e3-2.9e3+0.5e3-1.4e3+0.9e3+0.6e3-2e3-1330e3+53.8e3-0.4e3	#high field (double)
 
 
-####################################
-# calculate B field and transition frequencies 2023.09.20
-delta2 = 200e3
-gI = -0.000398853
-gJ = 2.0025403
-muB = 1.3996246e6
-b_trial = 1.393
-fhfs = 9.192631770e9
-fmix = 9.1326249676e9
+# --- Breit-Rabi calibration (initiated 2023.09.20) ---------------------
+#
+# Physics: the Cs-133 ground state (6S1/2, nuclear spin I = 7/2) has two
+# hyperfine levels F = 3 and F = 4, split by fhfs = 9.192631770 GHz. In a
+# magnetic field B each level fans out into Zeeman sublevels mf, and the
+# Breit-Rabi formula gives every sublevel energy exactly (to all orders
+# in B). With the dimensionless field parameter x = (gJ - gI)*muB*B/fhfs:
+#
+#     f(F,mf; B) = fhfs * [ -1/16 + mf*gI*muB*B/fhfs
+#                           +/- (1/2)*sqrt(1 + 4*mf*x/8 + x^2) ]
+#
+# where +/- is + for F = 4 and - for F = 3, the 16 is 2*(2I+1), the 8 is
+# (2I+1), and energies are in Hz relative to the hyperfine centroid.
+#
+# Calibration scheme: we measure the stretched transition |4,-4> -> |3,-3>
+# at DDS frequency f4new (the DDS drives a mixer with LO fmix, so the
+# microwave frequency = DDS frequency + fmix). fsolve inverts the formula
+# to find the B that reproduces f4new, and that B then predicts the DDS
+# frequency of every other microwave transition in the ladder below.
+
+delta2 = 200e3			# Hz, detuning shared by the 2-photon uw/rf pair
+gI  = -0.000398853		# Cs-133 nuclear g-factor
+gJ  = 2.0025403			# 6S1/2 electronic g-factor
+muB = 1.3996246e6		# Bohr magneton / h, in Hz/G
+b_trial = 1.393			# G, initial guess for the B-field solve below
+fhfs = 9.192631770e9	# Hz, Cs hyperfine splitting (exact; defines the SI second)
+fmix = 9.1326249676e9	# Hz, mixer LO frequency (microwave = DDS + fmix)
 # f4newHLower = f4newH -2e3  to avoid some resonances in the RF coil?
 
-HideBRCal=1
+HideBRCal=1  # code-folding helper: keeps these function defs in one collapsible block
 if (HideBRCal==1):
-	def flevel(F,mf,B):
+	def flevel(F, mf, B):
+		"""Breit-Rabi energy (Hz) of ground-state sublevel |F, mf> at field B (G).
+
+		F must be 3 or 4. Energies are relative to the hyperfine centroid,
+		so flevel(4,0,B) - flevel(3,0,B) -> fhfs as B -> 0.
 		"""
-	    Parameters
-	    ----------
-	    mF : Hyerfine sublevel
-	    B : Magnetic field unit(G)
-		DESCRIPTION
-		This function uses Breit-Rabi formula to calculate energy level
-	    Returns
-	    The energy level as function of magnetic field
-	    -------
-	    """
 		if F == 4:
-			eqn = fhfs * ( -1.0/16.0 + mf * gI * muB * B/fhfs + \
-		    1.0/2.0 * math.sqrt(1 + 4 * mf * (gJ - gI) * muB * B/(8*fhfs) + ( (gJ-gI) * muB * B / fhfs)**2))
+			sign = +1.0
 		elif F == 3:
-			eqn = fhfs*(-1.0/16.0 + mf*gI*muB*B/fhfs - \
-				1.0/2.0 * math.sqrt(1 + 4 * mf * (gJ - gI) * muB * B/(8*fhfs) +\
-					     ((gJ-gI) * muB * B / fhfs)**2))
+			sign = -1.0
 		else:
 			raise ValueError('flevel: F must be 3 or 4, got %r' % (F,))
-	    
-		return eqn
+		x = (gJ - gI) * muB * B / fhfs	# dimensionless field parameter
+		return fhfs * (-1.0/16.0 + mf * gI * muB * B / fhfs \
+			+ sign * 1.0/2.0 * math.sqrt(1 + 4 * mf * x / 8 + x**2))
 
 	def get_b_field(z):
-
+		"""Residual for fsolve: zero when the trial field z[0] (in G)
+		reproduces the measured |4,-4> -> |3,-3> DDS frequency f4new."""
 		B = z[0]
-		F = np.empty((1))
-		F[0] = flevel(4, -4, B) - flevel(3, -3, B) - f4new - fmix 
-	   
-		return F
-	def get_uw_freq(mF4, mF3):    
-		"""
-	    Calculate the microwave frequency for microwave transition.
-	    mF4 is the mf number for F= 4 state, likewise for mF3.
-	    """
-		B = B_field
-		fuw = flevel(4, mF4, B) - flevel(3, mF3, B) - fmix
-	    
-		return fuw
-	    
-	def get_uw_freq2():    
-		"""
-	    Calculate the microwave frequency for 2-photon transition.
-	    """
-		B = B_field
-		fuw = flevel(4, 1, B) - flevel(3, 0, B) - fmix - delta2
-	    
-		return fuw
+		residual = np.empty((1))
+		residual[0] = flevel(4, -4, B) - flevel(3, -3, B) - f4new - fmix
+		return residual
 
-	def get_rf_freq():    
-	    
-		B = B_field
-		frf = flevel(3, -1, B) - flevel(3, 0, B) - delta2
-	    
-		return frf
+	def get_uw_freq(mF4, mF3):
+		"""DDS frequency (Hz) of the microwave transition |4, mF4> -> |3, mF3>
+		at the solved field B_field (mixer LO fmix already subtracted)."""
+		return flevel(4, mF4, B_field) - flevel(3, mF3, B_field) - fmix
+
+	def get_uw_freq2():
+		"""DDS frequency (Hz) of the microwave leg |3,0> -> |4,1> of the
+		2-photon transition, detuned from resonance by delta2."""
+		return flevel(4, 1, B_field) - flevel(3, 0, B_field) - fmix - delta2
+
+	def get_rf_freq():
+		"""RF frequency (Hz) between Zeeman sublevels |3,0> and |3,-1> at
+		B_field, offset by delta2 (pairs with get_uw_freq2 for the
+		2-photon drive)."""
+		return flevel(3, -1, B_field) - flevel(3, 0, B_field) - delta2
 
 ####################################
 

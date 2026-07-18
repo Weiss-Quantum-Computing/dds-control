@@ -17,7 +17,7 @@ DelTempFiles = 1 # Clean up after we are done?
 DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit for another install
 FilenameHead = 'Freqscan'   # filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
-print (FileComment)
+print('Pulse file comment line: ' + FileComment.strip())
 
   
 ################ 2019.05.02 #####################
@@ -34,7 +34,7 @@ f4new = f4newH+481
 # f4newH for magnetic field measurement 
 f4newx = f4new + 200e3 + 7e3 - 614 - 15e3 + 132	 # for field  (997, 0, -84)
 f4newHy = 57615738.1  - 43.4e3 + 6e3    # for field  (0, 975, -38)
-print(f4new)
+print('f4new (4,-4 -> 3,-3 transition) = %.1f Hz' % f4new)
 
 #~ f4new =f4new+1e3
 #~ f4new = 58661697.8708+1.2e3-2.9e3+0.5e3-1.4e3+0.9e3+0.6e3-2e3-1330e3+53.8e3-0.4e3	#high field (double)
@@ -439,6 +439,15 @@ else:
 
 NumberOfFiles = len(Frequency)
 
+if NumberOfFiles > 1:
+	print('Scan: %.1f Hz to %.1f Hz, %d points (step %.1f Hz)' \
+		% (Frequency[0], Frequency[-1], NumberOfFiles, Frequency[1]-Frequency[0]))
+else:
+	print('Single-point scan at %.1f Hz' % Frequency[0])
+print('Detection pulse: type %d, %.3f ms, %.4f W, HSR %.1f Hz, repeated %dx%d' \
+	% (DetectionPulseType, DetectionPulseLength, DetectionPulsePower, \
+	   DetectionPulseHSR, DetRepeats, n))
+
 #~ Phase= np.arange (0,2.01,0.2)  #phase in units of pi
 #~ NumberOfFile7+5coolis = len(Phase)
 
@@ -451,9 +460,9 @@ MeasListFilename = FilenameHead+'-Meas'
 ScanFilename = FilenameHead+'.scan'
 	
 ListFilename = FilenameHead +'.lst'
-print (ListFilename)
 
 # Write Cooling file
+print('Writing cooling pulse file ' + Coolfilename)
 pulsefile = open(Coolfilename, "wb") # open pulse file
 pulsefile.write(FileComment) # write comment line
 writer = csv.writer(pulsefile, dialect='excel-tab') # define the file format
@@ -546,7 +555,7 @@ rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal-V2.exe'), 'Ga
 if rc != 0:
 	print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal-V2.exe) failed with exit %d. Aborting.' % rc)
 	sys.exit(1)
-print('After making Cool')
+print('Cooling pulse file compiled successfully (Gate).')
 
 # begin loop to write the detection pulse files    
 measfile = open(MeasListFilename, "wb")                  
@@ -557,7 +566,7 @@ def writerow_both(w, row):  # write one pulse row to both the given pulse file w
 	writerm.writerow(row)
 for i in xrange(0,len(Frequency)):
 #~ for i in xrange(0,len(Phase)):
-	print('Making pulsefile '+Filenames[i])
+	print('Writing pulse file %s: %.1f Hz' % (Filenames[i], Frequency[i]))
 	pulsefile = open(Filenames[i], "wb") # open pulse file
 	pulsefile.write(FileComment) # write comment line
 	writer = csv.writer(pulsefile, dialect='excel-tab') # define the file format
@@ -643,7 +652,7 @@ scanfile.write(str(NumberOfRepeats)+'\n')
 scanfile.close()
 
 
-#print('Current directory: '+os.getcwd())
+print('Compiling %d pulse files (stepDDS_cal3-V2.bat)...' % NumberOfFiles)
 rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3-V2.bat'), 'List'])
 if rc != 0:
 	print('ERROR: stepDDS_cal3-V2.bat failed with exit %d. Aborting.' % rc)
@@ -653,6 +662,7 @@ if rc != 0:
 	#os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")
 	#os.system("del Cool List RAWCool")
 if DelTempFiles == 1 :
+	print('Deleting temp files: %s, Gate, List, reset' % Coolfilename)
 	os.system("del "+Coolfilename+" Gate List reset")
 
 listfile = open(ListFilename, "wb")
@@ -661,10 +671,10 @@ for j in xrange(0,NumberOfRepeats):
 		listfile.write(i+'-final.txt\n')
 listfile.close()                 
             
-print("%d files"%(NumberOfFiles))
-print("%d repeats"%(NumberOfRepeats))
-print("%d scans total"%(NumberOfFiles*NumberOfRepeats))
+print('Scan list %s: %d files x %d repeats = %d scans total' \
+	% (ListFilename, NumberOfFiles, NumberOfRepeats, NumberOfFiles*NumberOfRepeats))
                     
 os.system("copy "+sys.argv[0]+" "+FilenameHead+".py") # save a copy of this python file
 os.system("copy "+FilenameHead+".lst last.lst") # copy list file to last.lst
 os.system("copy "+FilenameHead+".scan last.scan") # copy scan file to last.lst
+print('Done. Script copied to %s.py; list/scan files copied to last.lst and last.scan.' % FilenameHead)

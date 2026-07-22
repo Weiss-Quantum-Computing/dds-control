@@ -30,7 +30,7 @@ DelTempFiles = 1 # Clean up after we're done?
 # define some constants
 FilenameHead = 'Cool_Cal'   	 # filenames will start with this (can include directory, but use forward slash)
 FileComment  = 'Cool\n'  	 	 # Comment line at head of pulse files (must end with \n)
-print (FileComment)
+print('Pulse file comment line: ' + FileComment.strip())
 
 
 f4new =58644387.8708 - 1.2e3 + 0.5e3 -8.2e3+7e3 -0.6e3+1.8e3 + 1.0e3-4e3 +0e3

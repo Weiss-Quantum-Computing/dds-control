@@ -20,9 +20,10 @@ from scipy.optimize import curve_fit
 DelTempFiles = 0 # Clean up after we're done?
 
 # define some constants
+DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit for another install
 FilenameHead = 'Cool_Cal'   # filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
-print (FileComment)
+print('Pulse file comment line: ' + FileComment.strip())
 
 # BackupRabi-Begin
 
@@ -224,7 +225,6 @@ MeasListFilename = FilenameHead+'-Meas'
 ScanFilename = FilenameHead+'.scan'
 	
 ListFilename = FilenameHead +'.lst'
-print (ListFilename)
 
 # Write Cooling file
 pulsefile = open(Coolfilename, "wb") # open pulse file
@@ -332,9 +332,15 @@ for i in xrange(0,10): # Typical cooling sequence (-2, -1)
 
 pulsefile.close() # Close the cooling pulse file
 
-os.system('copy '+Coolfilename+' Cool')
+rc = os.system('copy '+Coolfilename+' Cool')
+if rc != 0:
+	print('ERROR: copy %s -> Cool failed with exit %d. Aborting.' % (Coolfilename, rc))
+	sys.exit(1)
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
-subprocess.call(['C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe', 'Cool'])
+rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'Cool'])
+if rc != 0:
+	print('ERROR: compile (NewDDS2-Cooling2.0-Cal.exe Cool) failed with exit %d. Aborting.' % rc)
+	sys.exit(1)
 
 copyfile('RAWCool','C:/Users/Yang/Documents/Eclipse/CameraGUI/release/DDScool.txt')
 copyfile('RAWCool','C:/Users/Yang/Documents/Eclipse/CameraGUI/debug/DDScool.txt')
@@ -342,7 +348,7 @@ copyfile('RAWCool','C:/Users/Yang/Documents/Eclipse/CameraGUI/DDScool.txt')
 os.system("del RAWCool")
 if DelTempFiles == 1 :
 	#~ os.system("del Cool List RAWCool reset")	
-	os.system("del Cool List reset")	
+	os.system("del "+Coolfilename+" Cool List reset")	
 	
 
 	

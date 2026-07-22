@@ -25,9 +25,10 @@ import os, subprocess          # calls to operating system
 DelTempFiles = 1 # Clean up after we are done?
 
 # define some constants
+DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit for another install
 FilenameHead = 'Coolscan'   # filenames will start with this
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
-print (FileComment)
+print('Pulse file comment line: ' + FileComment.strip())
 
 ##################################################
 #######  Reference frequency (from Cool_Cal.py / Freqscan.py) #######
@@ -113,6 +114,12 @@ DetRepeats = 1      # how many detection pulses to repeat
 
 NumberOfFiles = len(ScanOffsets)
 
+if NumberOfFiles > 1:
+	print('Offset scan: %.4f to %.4f Hz, %d points (step %.4f Hz)' \
+		% (ScanOffsets[0], ScanOffsets[-1], NumberOfFiles, ScanOffsets[1]-ScanOffsets[0]))
+else:
+	print('Single-point offset scan at %.4f Hz' % ScanOffsets[0])
+
 # Generate file names
 Filenames = range(0,NumberOfFiles)
 for i in xrange(0,NumberOfFiles):
@@ -120,7 +127,6 @@ for i in xrange(0,NumberOfFiles):
 MeasListFilename = FilenameHead+'-Meas'
 ScanFilename = FilenameHead+'.scan'
 ListFilename = FilenameHead +'.lst'
-print (ListFilename)
 
 measfile = open(MeasListFilename, "wb")
 measfile.write(FileComment)
@@ -204,7 +210,11 @@ scanfile.write(str(NumberOfRepeats)+'\n')
 scanfile.close()
 
 # Compile every point and build finals as reset+RAW<point>
-subprocess.call([r"C:\Users\Yang\Documents\Data\DDScontrol\stepDDS_coolscan.bat", "List"])
+print('Compiling %d pulse files (stepDDS_coolscan.bat)...' % NumberOfFiles)
+rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_coolscan.bat'), 'List'])
+if rc != 0:
+	print('ERROR: stepDDS_coolscan.bat failed with exit %d. Aborting.' % rc)
+	sys.exit(1)
 
 if DelTempFiles == 1 :
     os.system("del List reset")
@@ -215,11 +225,11 @@ for j in xrange(0,NumberOfRepeats):
         listfile.write(i+'-final.txt\n')
 listfile.close()
 
-print("%d files"%(NumberOfFiles))
-print("%d repeats"%(NumberOfRepeats))
-print("%d scans total"%(NumberOfFiles*NumberOfRepeats))
+print('Scan list %s: %d files x %d repeats = %d scans total' \
+	% (ListFilename, NumberOfFiles, NumberOfRepeats, NumberOfFiles*NumberOfRepeats))
 print("Scanned %s from fc%+g to fc%+g Hz"%(ScanLabel, StartingOffset, StoppingOffset))
 
 os.system("copy "+sys.argv[0]+" "+FilenameHead+".py") # save a copy of this python file
 os.system("copy "+FilenameHead+".lst last.lst") # copy list file to last.lst
 os.system("copy "+FilenameHead+".scan last.scan") # copy scan file to last.scan
+print('Done. Script copied to %s.py; list/scan files copied to last.lst and last.scan.' % FilenameHead)

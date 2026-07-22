@@ -398,7 +398,6 @@ MeasListFilename = FilenameHead+'-Meas'
 ScanFilename = FilenameHead+'.scan'
 	
 ListFilename = FilenameHead +'.lst'
-print (ListFilename)
 
 # Write Cooling file
 print('Writing cooling pulse file ' + Coolfilename)

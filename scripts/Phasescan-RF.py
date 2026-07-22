@@ -14,9 +14,10 @@ from scipy.optimize import fsolve  # solve for magnetic field by transition freq
 DelTempFiles = 1 # Clean up after we're done?
 
 # define some constants
+DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit for another install
 FilenameHead = 'Phasescan-RF'   # filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
-print (FileComment)
+print('Pulse file comment line: ' + FileComment.strip())
 
 
 ################ 2019.05.02 #####################
@@ -81,59 +82,60 @@ Pclock_PiHalf_80us  = 1.8415	# for Blackman  20180801
 Pclock_Pi_120us =0.8150
 ##### initiated 2018.02.02 #####
 
-# define two-photon transition frquencies w.r.t. f4newH 
-delta2 = 200e3
-gI = -0.000398853
-gJ = 2.0025403
-muB = 1.3996246e6
-b_trial = 1.393
-fhfs = 9.192631770e9
-fmix = 9.1326249676e9
-def flevel(F,mf,B):
-    """
-    Parameters
-    ----------
-    mF : Hyerfine sublevel
-    B : Magnetic field unit(G)
-        DESCRIPTION
-        This function uses Breit-Rabi formula to calculate energy level
-    Returns
-    The energy level as function of magnetic field
-    -------
-    """
+# --- Breit-Rabi calibration -------------------------------------------
+# Physics: the Cs-133 ground state (6S1/2, nuclear spin I = 7/2) has two
+# hyperfine levels F = 3 and F = 4, split by fhfs = 9.192631770 GHz. In a
+# magnetic field B each level fans out into Zeeman sublevels mf; the
+# Breit-Rabi formula gives every sublevel energy exactly. With the
+# dimensionless field parameter x = (gJ - gI)*muB*B/fhfs:
+#     f(F,mf; B) = fhfs * [ -1/16 + mf*gI*muB*B/fhfs +/- (1/2)*sqrt(1 + 4*mf*x/8 + x^2) ]
+# (+ for F = 4, - for F = 3). B is found from the measured stretched
+# transition f4newH; here it yields the RF frequency fRF.
+delta2 = 200e3          # Hz, detuning of the 2-photon uw/rf pair
+gI  = -0.000398853      # Cs-133 nuclear g-factor
+gJ  = 2.0025403         # 6S1/2 electronic g-factor
+muB = 1.3996246e6       # Bohr magneton / h, in Hz/G
+b_trial = 1.393         # G, initial guess for the B-field solve
+fhfs = 9.192631770e9    # Hz, Cs hyperfine splitting (exact)
+fmix = 9.1326249676e9   # Hz, mixer LO (microwave = DDS + fmix)
+
+def flevel(F, mf, B):
+    """Breit-Rabi energy (Hz) of ground-state sublevel |F, mf> at field B (G). F must be 3 or 4."""
     if F == 4:
-            eqn = fhfs * ( -1.0/16.0 + mf * gI * muB * B/fhfs + \
-	    1.0/2.0 * math.sqrt(1 + 4 * mf * (gJ - gI) * muB * B/(8*fhfs) + ( (gJ-gI) * muB * B / fhfs)**2))
+        sign = +1.0
     elif F == 3:
-            eqn = fhfs*(-1.0/16.0 + mf*gI*muB*B/fhfs - \
-                        1.0/2.0 * math.sqrt(1 + 4 * mf * (gJ - gI) * muB * B/(8*fhfs) +\
-                                     ((gJ-gI) * muB * B / fhfs)**2))
-    else: print('wrong F number!')
-    
-    return eqn
+        sign = -1.0
+    else:
+        raise ValueError('flevel: F must be 3 or 4, got %r' % (F,))
+    x = (gJ - gI) * muB * B / fhfs
+    return fhfs * (-1.0/16.0 + mf * gI * muB * B / fhfs \
+        + sign * 1.0/2.0 * math.sqrt(1 + 4 * mf * x / 8 + x**2))
 
 def get_b_field(z):
+    """Residual for fsolve: zero when field z[0] reproduces the measured f4newH."""
     B = z[0]
-    F = np.empty((1))
-    F[0] = flevel(4, -4, B) - flevel(3, -3, B) - f4newH - fmix 
-    return F
+    residual = np.empty((1))
+    residual[0] = flevel(4, -4, B) - flevel(3, -3, B) - f4newH - fmix
+    return residual
 
-def get_uw_freq():    
-    
-    B = fsolve(get_b_field,1.39)
-    fuw = flevel(4, 1, B) - flevel(3, 0, B) - fmix - delta2
-    return fuw
+def get_uw_freq():
+    """DDS frequency of the 2-photon microwave leg |3,0> -> |4,1> at B_field."""
+    return flevel(4, 1, B_field) - flevel(3, 0, B_field) - fmix - delta2
 
-def get_rf_freq():    
-    
-    B = fsolve(get_b_field,1.39)
-    frf = flevel(3, -1, B) - flevel(3, 0, B) - delta2
-    
-    return frf
+def get_rf_freq():
+    """RF frequency between |3,0> and |3,-1> at B_field, offset by delta2."""
+    return flevel(3, -1, B_field) - flevel(3, 0, B_field) - delta2
 
+# Solve the Breit-Rabi B field once, up front, with a convergence check.
+B_field, _brinfo, _brier, _brmsg = fsolve(get_b_field, b_trial, full_output=True)
+if _brier != 1:
+    print('ERROR: B-field solve did not converge (ier=%d): %s' % (_brier, _brmsg))
+    print('Check that f4newH (=%f) is correct.' % f4newH)
+    sys.exit(1)
+B_field = B_field[0]
+print('Solved magnetic field B = %.4f G (from f4newH)' % B_field)
 
-
-fRF = get_rf_freq()[0]
+fRF = get_rf_freq()
 ####################
 
 HideUnusedSettings = 1
@@ -322,6 +324,12 @@ Phase = np.arange(StartingPhase, StoppingPhase+PhaseStepSize/2.0, \
 
 NumberOfFiles = len(Phase)
 
+if NumberOfFiles > 1:
+	print('Phase scan: %.3f to %.3f pi, %d points (step %.4f pi)' \
+		% (Phase[0], Phase[-1], NumberOfFiles, Phase[1]-Phase[0]))
+else:
+	print('Single-point phase scan at %.3f pi' % Phase[0])
+
 #~ Phase= np.arange (0,2.01,0.2)  #phase in units of pi
 #~ NumberOfFile7+5coolis = len(Phase)
 
@@ -334,9 +342,9 @@ MeasListFilename = FilenameHead+'-Meas'
 ScanFilename = FilenameHead+'.scan'
 	
 ListFilename = FilenameHead +'.lst'
-print (ListFilename)
 
 # Write Cooling file
+print('Writing cooling pulse file ' + Coolfilename)
 pulsefile = open(Coolfilename, "wb") # open pulse file
 pulsefile.write(FileComment) # write comment line
 writer = csv.writer(pulsefile, dialect='excel-tab') # define the file format
@@ -391,10 +399,16 @@ writer.writerow([58.0e6, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
 
 pulsefile.close() # Close the cooling pulse file
 
-os.system('copy '+Coolfilename+' Gate')
+rc = os.system('copy '+Coolfilename+' Gate')
+if rc != 0:
+	print('ERROR: copy %s -> Gate failed with exit %d. Aborting.' % (Coolfilename, rc))
+	sys.exit(1)
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
-subprocess.call(['C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe', 'Gate'])
-print('After making Cool')
+rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'Gate'])
+if rc != 0:
+	print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal.exe) failed with exit %d. Aborting.' % rc)
+	sys.exit(1)
+print('Cooling pulse file compiled successfully (Gate).')
 
 # begin loop to write the detection pulse files    
 measfile = open(MeasListFilename, "wb")                  
@@ -402,7 +416,7 @@ measfile.write(FileComment)
 writerm = csv.writer(measfile, dialect='excel-tab')
 #~ for i in xrange(0,len(Power)):
 for i in xrange(0,len(Phase)):
-    print('Making pulsefile '+Filenames[i])
+    print('Writing pulse file %s: phase %.3f pi' % (Filenames[i], Phase[i]))
     pulsefile = open(Filenames[i], "wb") # open pulse file
     pulsefile.write(FileComment) # write comment line
     writer = csv.writer(pulsefile, dialect='excel-tab') # define the file format
@@ -516,7 +530,7 @@ for i in xrange(0,len(Phase)):
                         DetectionPulseType, \
                         'Measure'])
         writerm.writerow([Frequency, \
-                        Phase, \
+                        Phase[i], \
                         DetectionPulseLength, \
                         P, \
                         DetectionPulseType, \
@@ -542,13 +556,18 @@ scanfile.close()
 
 
 #print('Current directory: '+os.getcwd())
-subprocess.call(["C:\Users\Yang\Documents\Data\DDScontrol\stepDDS_cal3_RF.bat", "List"])
+print('Compiling %d pulse files (stepDDS_cal3_RF.bat)...' % NumberOfFiles)
+rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3_RF.bat'), 'List'])
+if rc != 0:
+	print('ERROR: stepDDS_cal3_RF.bat failed with exit %d. Aborting.' % rc)
+	sys.exit(1)
 #print('After batch file')
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_copy.bat List")
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")
 #os.system("del Cool List RAWCool")
 if DelTempFiles == 1 :
-	os.system("del Cool List reset")	
+	print('Deleting temp files: %s, Gate, List, reset' % Coolfilename)
+	os.system("del "+Coolfilename+" Gate List reset")	
 
 listfile = open(ListFilename, "wb")
 for j in xrange(0,NumberOfRepeats):
@@ -556,10 +575,10 @@ for j in xrange(0,NumberOfRepeats):
         listfile.write(i+'-final.txt\n')
 listfile.close()                 
             
-print("%d files"%(NumberOfFiles))
-print("%d repeats"%(NumberOfRepeats))
-print("%d scans total"%(NumberOfFiles*NumberOfRepeats))
+print('Scan list %s: %d files x %d repeats = %d scans total' \
+	% (ListFilename, NumberOfFiles, NumberOfRepeats, NumberOfFiles*NumberOfRepeats))
                     
 os.system("copy "+sys.argv[0]+" "+FilenameHead+".py") # save a copy of this python file
 os.system("copy "+FilenameHead+".lst last-RF.lst") # copy list file to last.lst
 os.system("copy "+FilenameHead+".scan last-RF.scan") # copy scan file to last.lst
+print('Done. Script copied to %s.py; list/scan files copied to last-RF.lst and last-RF.scan.' % FilenameHead)

@@ -19,6 +19,33 @@ DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit f
 # is the master copy that every bat splices into the final files (review G2-2.1).
 if os.path.normcase(os.path.abspath(os.getcwd())) == os.path.normcase(DDSDIR):
         sys.exit('ERROR: run this script from a data folder below DDScontrol, not in ' + DDSDIR)
+# Refuse rows the compilers would turn into garbage before anything is compiled (review
+# G2-2.4): the same limits as ddsgui (config.POWMAX_W) and the rebuilt Cal/Cal-V2 compilers.
+POWMAX_W = 5.188  # W, top of the compilers' power calibration table (Pow2AmpWord)
+def check_pulse_files(names):
+    known = (-1, 1, 2, 22, 3, 33, 66, 661, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17)
+    bad = []
+    for name in names:
+        if not os.path.exists(name):  # e.g. no Gate file in this script; the bat checks the rest
+            continue
+        for n, line in enumerate(open(name, 'rb').read().splitlines()[1:], 2):
+            cells = line.split('\t')
+            if len(cells) < 5:
+                continue
+            length, power, ptype = float(cells[2]), float(cells[3]), int(float(cells[4]))
+            if ptype == 0:  # end of the pulse list for the compiler
+                break
+            if ptype not in known:
+                bad.append('%s line %d: unknown pulse type %d' % (name, n, ptype))
+            if not (0.0 <= power < POWMAX_W):
+                bad.append('%s line %d: power %r W is outside 0 <= P < %g W' % (name, n, power, POWMAX_W))
+            if ptype not in (-1, 4, 10) and not (length > 0.0):
+                bad.append('%s line %d: length %r ms is not positive' % (name, n, length))
+    if bad:
+        print('ERROR: %d bad pulse row(s); stopping before they are compiled into final files:' % len(bad))
+        for b in bad[:20]:
+            print('  ' + b)
+        sys.exit(1)
 FilenameHead = 'Phasescan'   # filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
 print('Pulse file comment line: ' + FileComment.strip())
@@ -436,7 +463,7 @@ DetectionPulseHSR    = 0		# 0Hz for blackman
 # Typical AFP parameters below:
 # DetectionPulseType   = 1  # 1 for AFP, 2 for Blackman, 3 fs	or square, 4 for end, 9 for CW
 # DetectionPulseLength = 3 # ms
-# DetectionPulsePower  = 6. # W
+# DetectionPulsePower  = 0.08 # W (must stay below 5.188 W, the top of the power table)
 # DetectionPulseHSR    = 6.0e3 # Hz (only used for AFP pulses)
 
 # Typical Blackman parameters below:
@@ -1249,6 +1276,7 @@ print(_coolstate)
 _coolfile = open(FilenameHead + '-RAWCool.txt', 'wb')
 _coolfile.write(_coolstate + '\r\n')
 _coolfile.close()
+check_pulse_files(Filenames + [Coolfilename])
 rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3.bat'), 'List'])
 if rc != 0:
         print('ERROR: stepDDS_cal3.bat failed with exit %d. Aborting.' % rc)

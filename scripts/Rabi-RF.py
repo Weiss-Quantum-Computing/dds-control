@@ -161,7 +161,7 @@ print Power
 # Typical AFP parameters below:
 # DetectionPulseType   = 1  # 1 for AFP, 2 for Blackman, 3 fs	or square, 4 for end, 9 for CW
 # DetectionPulseLength = 3 # ms
-# DetectionPulsePower  = 6. # W
+# DetectionPulsePower  = 0.08 # W (must stay below 5.188 W, the top of the power table)
 # DetectionPulseHSR    = 6.0e3 # Hz (only used for AFP pulses)
 
 # Typical Blackman parameters below:

@@ -49,8 +49,16 @@ const int REFUSED = 2;
 // Why a pulse row cannot be compiled faithfully, or 0 if it can. main() checks every row
 // before compiling anything: these rows used to compile into a wrong but well-formed RAW
 // file with exit code 0 (review 2026-10-15).
-static const char * BadPulseRow(const double power)
+static const char * BadPulseRow(const int type, const double power)
     {
+    switch (type) // the cases of the switch in main()
+	{
+    case -1: case 1: case 2: case 22: case 3: case 33: case 66: case 661:
+    case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11:
+	break;
+    default:
+	return "unknown pulse type (types 12-17 need the Cal-V2 compiler)";
+	}
     if (!(power >= 0.0)) // also NaN
 	return "power is negative";
     if (power > (double) POWMAX)
@@ -156,7 +164,7 @@ int main(int argc, char* argv[])
 	unsigned int bad = 0;
 	for (unsigned int num = 0; num < totalnum; num++)
 	    {
-	    const char * why = BadPulseRow((double) parameters[num][3]);
+	    const char * why = BadPulseRow(int(parameters[num][4]), (double) parameters[num][3]);
 	    if (why)
 		{
 		cout << "ERROR: pulse " << dec << num+1 << " (type " << int(parameters[num][4])
@@ -429,10 +437,13 @@ int main(int argc, char* argv[])
 		}
 		break;
 
-	    default:
+	    default: // not reached: BadPulseRow refuses unknown types before this loop
 		{
-		num = 101;
-		cout << "Undefined pulse type or end of pulse list." << endl;
+		// was "num = 101", which in a list longer than 102 rows skipped to row 102
+		// and carried on (review G2-11.3)
+		cout << "ERROR: undefined pulse type " << int(parameters[num][4]) << " in pulse "
+		     << num+1 << ". Refusing " << filename << ", no RAW file written." << endl;
+		return (REFUSED);
 		}
 		}
 	}

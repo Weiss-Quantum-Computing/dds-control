@@ -663,6 +663,8 @@ writer.writerow([f42to31new, -6e3, 3.0, P42to31new*3, 1, '4,-2 -> 3,-1'])
 
 pulsefile.close() # Close the cooling pulse file
 
+if os.path.exists('RAWGate'):  # never splice a Gate left in this folder by an earlier scan (review G2-1.2)
+	os.remove('RAWGate')
 rc = os.system('copy '+Coolfilename+' Gate')
 if rc != 0:
 	print('ERROR: copy %s -> Gate failed with exit %d. Aborting.' % (Coolfilename, rc))
@@ -1242,8 +1244,8 @@ if rc != 0:
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")
 #os.system("del Cool List RAWCool")
 if DelTempFiles == 1 :
-	print('Deleting temp files: %s, Gate, List, reset' % Coolfilename)
-	os.system("del "+Coolfilename+" Gate List reset")	
+	print('Deleting temp files: %s, Gate, RAWGate, List, reset' % Coolfilename)
+	os.system("del "+Coolfilename+" Gate RAWGate List reset")	
 
 listfile = open(ListFilename, "wb")
 for j in xrange(0,NumberOfRepeats):

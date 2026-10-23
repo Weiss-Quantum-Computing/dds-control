@@ -1,3 +1,6 @@
+# REFERENCE ONLY (review G2-10.1): pre-2015 generation. Its clean-up deletes RAWCool and
+# reset in the working folder - the RAWCool every current microwave scan splices in.
+raise SystemExit('scripts/legacy/cooling_control.py is kept for reference only and must not be run.')
 # Write pulse files for NewDDS2-version3.exe
 # Ted Corcovilos 20110308 (Rewrite for easier changes)
 # NB: Check that all 'float' numbers contain an explicit decimal point

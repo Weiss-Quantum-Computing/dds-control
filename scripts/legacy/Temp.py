@@ -1,3 +1,6 @@
+# REFERENCE ONLY - does not run (review G2-10.1): MULT is never defined (NameError once a
+# picomotor answers) and ldcnlib lives in scripts/hardware/, not here.
+raise SystemExit('scripts/legacy/Temp.py is kept for reference only and must not be run.')
 import serial, sys, subprocess
 from time import sleep
 import ldcnlib as L #wrappers for ldcn library (picomotor DLL control)

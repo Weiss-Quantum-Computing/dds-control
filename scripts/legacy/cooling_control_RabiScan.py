@@ -1,3 +1,7 @@
+# REFERENCE ONLY - does not run (review G2-10.1): sqrt is not imported and
+# StartingFrequency is undefined; its powers reach 6 W, past the compilers' 5.188 W
+# calibration table (they now refuse such rows).
+raise SystemExit('scripts/legacy/cooling_control_RabiScan.py is kept for reference only and must not be run.')
 # Write pulse files for NewDDS2-version3.exe
 # Ted Corcovilos 20110308 (Rewrite for easier changes)
 # NB: Check that all 'float' numbers contain an explicit decimal point

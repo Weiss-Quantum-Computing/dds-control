@@ -1235,6 +1235,20 @@ scanfile.close()
 
 #print('Current directory: '+os.getcwd())
 print('Compiling %d pulse files (stepDDS_cal3.bat)...' % NumberOfFiles)
+# Record the cooling state of this data set: the bat splices whatever RAWCool sits in this
+# folder, and deleting RAWCool is the cooling-off switch (review G2-2.3). Kept out of the
+# -Meas file so it stays byte-comparable with ddsgui's.
+import time, hashlib
+if os.path.exists('RAWCool'):
+        _rawcool = open('RAWCool', 'rb').read()
+        _coolstate = 'RAWCool: present, %s, %d bytes, md5 %s' % (time.strftime('%Y-%m-%d %H:%M:%S', \
+            time.localtime(os.path.getmtime('RAWCool'))), len(_rawcool), hashlib.md5(_rawcool).hexdigest())
+else:
+        _coolstate = 'RAWCool: absent (no cooling block spliced)'
+print(_coolstate)
+_coolfile = open(FilenameHead + '-RAWCool.txt', 'wb')
+_coolfile.write(_coolstate + '\r\n')
+_coolfile.close()
 rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3.bat'), 'List'])
 if rc != 0:
         print('ERROR: stepDDS_cal3.bat failed with exit %d. Aborting.' % rc)

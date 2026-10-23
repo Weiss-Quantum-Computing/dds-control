@@ -604,7 +604,7 @@ listfile.close()
 print('Scan list %s: %d files x %d repeats = %d scans total' \
         % (ListFilename, NumberOfFiles, NumberOfRepeats, NumberOfFiles*NumberOfRepeats))
                     
-os.system("copy "+sys.argv[0]+" "+FilenameHead+".py") # save a copy of this python file
+os.system('copy "%s" "%s.py"' % (sys.argv[0], FilenameHead)) # save a copy of this python file (quoted: paths may hold spaces)
 os.system("copy "+FilenameHead+".lst last-RF.lst") # copy list file to last.lst
 os.system("copy "+FilenameHead+".scan last-RF.scan") # copy scan file to last.lst
 print('Done. Script copied to %s.py; list/scan files copied to last-RF.lst and last-RF.scan.' % FilenameHead)

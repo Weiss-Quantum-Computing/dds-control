@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 	    // This loop counts and prints out the pulses
 	    for (unsigned int num = 0; num < MAXPULSES; num++)
 		{//reading once takes ~9.5ms
-		cout << "Reading pulse " << num << endl;
+		// (per-row "Reading pulse N" debug print removed: one line per row up to the end row)
 		if (int(parameters[num][4])==0/*int(parameters[num][4]) < 1 || int(parameters[num][4]) > 9)*/ )// Check pulse type in range
 		    {
 		    totalnum = num;

@@ -73,14 +73,14 @@ public:
     void SetBoardAddress(const unsigned char val)
 	{
 	// TODO: check range
-	RawIO = (RawIO & ~0x0000003F) + ((uint32_t)val << 18);
+	RawIO = (RawIO & ~0x00FC0000) + ((uint32_t)val << 18); // bits 18-23 (was ~0x3F, the register bits)
 	return;
 	}
 
     void SetMask(const unsigned char val)
   	{
   	// TODO: check range
-  	RawIO = (RawIO & ~0x01000000) + ((uint32_t)val << 24);
+  	RawIO = (RawIO & ~0x04000000) + ((uint32_t)val << 26); // bit 26, as the constructor (was bit 24)
   	return;
   	}
 
@@ -313,7 +313,7 @@ public:
 	}
     void SetPhaseAdj2(const unsigned short phase)
 	{
-	RegPhaseAdj2[0] = char(phase & 0xFF00 >> 8);
+	RegPhaseAdj2[0] = char((phase & 0xFF00) >> 8); // MSB first (precedence fixed, as SetPhaseAdj1)
 	RegPhaseAdj2[1] = char(phase & 0x00FF);
 	}
     void SetFreq1(const uint64_t freq)

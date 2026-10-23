@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <limits>
 
 //using namespace libxl;
 using namespace std;
@@ -93,6 +94,12 @@ int GetPulse(const char* filename, const unsigned maxp,
 		}
 	    }
 	pFile.get(comments,79);
+	// An empty comment made get() extract nothing and fail the stream, and a comment longer
+	// than 78 characters left the rest for the next row's numbers: either way every later row
+	// read as 0 = end of list. Recover and skip to the end of the line.
+	if (pFile.fail() && !pFile.eof())
+	    pFile.clear();
+	pFile.ignore(numeric_limits<streamsize>::max(), '\n');
 #ifdef _DEBUG
 	cout << comments;
 	cout << endl;

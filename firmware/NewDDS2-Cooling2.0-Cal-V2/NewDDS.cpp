@@ -43,6 +43,21 @@ using namespace std;
 #define DEBUGFILE "debug.txt" // file to dump some debug info
 #include "time.h"
 
+// Exit code when the pulse file is refused (nothing compiled, no RAW file left behind).
+const int REFUSED = 2;
+
+// Why a pulse row cannot be compiled faithfully, or 0 if it can. main() checks every row
+// before compiling anything: these rows used to compile into a wrong but well-formed RAW
+// file with exit code 0 (review 2026-10-15).
+static const char * BadPulseRow(const double power)
+    {
+    if (!(power >= 0.0)) // also NaN
+	return "power is negative";
+    if (power > (double) POWMAX)
+	return "power is above POWMAX, the top of the power calibration table";
+    return 0;
+    }
+
 
 int main(int argc, char* argv[])
     {
@@ -76,6 +91,9 @@ int main(int argc, char* argv[])
 	    filename = argv[1];
 	    cout << "Using input file " << filename << endl;
 	}
+    // Remove a RAW file left by an earlier compile, so that a refused or failed compile
+    // cannot leave a stale one for the bats / scripts to splice.
+    remove(("RAW" + filename).c_str());
 
 
     unsigned int totalnum ; // count number of pulses
@@ -132,6 +150,28 @@ int main(int argc, char* argv[])
 	    }
 
     cout << "Number of pulses:" << dec << totalnum << endl;
+
+    // Check every row before compiling any (see BadPulseRow).
+	{
+	unsigned int bad = 0;
+	for (unsigned int num = 0; num < totalnum; num++)
+	    {
+	    const char * why = BadPulseRow((double) parameters[num][3]);
+	    if (why)
+		{
+		cout << "ERROR: pulse " << dec << num+1 << " (type " << int(parameters[num][4])
+		     << ", " << parameters[num][2] << " ms, " << parameters[num][3] << " W): "
+		     << why << endl;
+		bad++;
+		}
+	    }
+	if (bad)
+	    {
+	    cout << "Refusing " << filename << ": " << dec << bad
+		 << " bad row(s), nothing compiled, no RAW file written." << endl;
+	    return (REFUSED);
+	    }
+	}
 
     // Create the Pulse train
     // These next variables are redundant, could be removed

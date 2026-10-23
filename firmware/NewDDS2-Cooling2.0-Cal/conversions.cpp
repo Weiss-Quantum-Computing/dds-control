@@ -235,8 +235,17 @@ unsigned int Pow2AmpWord(double pow) //convert power in watts to 12-bit Amplitud
 
     double temp, aa, bb, cc, dd;
        unsigned int ju, jm, jl;
-       ju = 22; jl = 0; jm = 0;  //ju=12; 4-6-2011
+       ju = 20; jl = 0; jm = 0;  // last index of the 21-point table (was 22, which read past x[]/y[]); ju=12; 4-6-2011
        pow = pow*1000;
+
+    // Clamp to the table (review G2-11.1, G2-11.2). Below x[0] the spline extrapolated to a
+    // negative fraction that wrapped to a huge unsigned word, so any negative power (even
+    // -1e-17 W from a float difference) played at FULL amplitude; above x[20] the search
+    // read past the arrays. !(pow > 0) also catches NaN. In-table powers are unchanged.
+    if (!(pow > 0))
+	return (0);
+    if (pow >= x[20])
+	return (4095);
 
     /// calibration on 2015------------------begin----------------------------------------
 

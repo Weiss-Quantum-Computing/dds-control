@@ -172,6 +172,13 @@ def rf_Power_Calib(f):
     pscle : the power scale factor for frequency f
     -------
     """
+    # The cubic is fitted for 280-300 kHz and has a real root (a pole of the scale) at
+    # 232.4 kHz: outside the range it silently extrapolates, e.g. 2.5x at 250 kHz (review
+    # G2-3.1 / G2-5.1). Refuse instead of writing an unmeasured power.
+    if np.min(f) < 280e3 or np.max(f) > 300e3:
+        sys.exit('ERROR: rf_Power_Calib is calibrated for 280-300 kHz only, asked for '
+                 '%.0f-%.0f Hz. Change the RF frequency or extend the calibration.'
+                 % (np.min(f), np.max(f)))
     x = f * 1e-5 
     temp_scale = -253.547 + 286.518*x - 108.084*x**2 + 13.6582*x**3
     pscale = temp_scale**(-2)

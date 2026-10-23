@@ -451,16 +451,10 @@ writer.writerow([58.0e6, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
 
 pulsefile.close() # Close the cooling pulse file
 
-rc = os.system('copy '+Coolfilename+' Gate')
-if rc != 0:
-	print('ERROR: copy %s -> Gate failed with exit %d. Aborting.' % (Coolfilename, rc))
-	sys.exit(1)
-#os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
-rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'Gate'])
-if rc != 0:
-	print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal.exe) failed with exit %d. Aborting.' % rc)
-	sys.exit(1)
-print('Cooling pulse file compiled successfully (Gate).')
+# No Gate here (review G2-4.2 / G2-5.2): the RF bats assemble reset + RAW<point> only, so a
+# compiled Gate was never played and its RAWGate was left for a later MW scan to splice.
+# The Coolfilename file above is kept as the record of the pre-scan rows; to play such rows,
+# put them in each point file (as the per-point Dummy already is).
 
 # begin loop to write the detection pulse files    
 measfile = open(MeasListFilename, "wb")                  
@@ -622,8 +616,8 @@ if rc != 0:
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")
 #os.system("del Cool List RAWCool")
 if DelTempFiles == 1 :
-	print('Deleting temp files: %s, Gate, List, reset' % Coolfilename)
-	os.system("del "+Coolfilename+" Gate List reset")	
+	print('Deleting temp files: %s, List, reset' % Coolfilename)
+	os.system("del "+Coolfilename+" List reset")	
 
 listfile = open(ListFilename, "wb")
 for j in xrange(0,NumberOfRepeats):

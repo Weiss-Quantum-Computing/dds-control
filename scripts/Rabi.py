@@ -172,7 +172,7 @@ DetectionPulseHSR    = 0		#-4.0e3 #.0e3 #4.0e3 # Hz (only used for AFP pulses)
 #~ print(Power)
 #~ Power = DetectionPulsePower*((np.arange(0.99, 1.01,  0.002)**2))
 #~ Power = DetectionPulsePower*((np.arange(0.0, 1.02,  0.1)**2))
-Power = DetectionPulsePower*((np.arange(0.9, 1.1,  0.02)**2))
+Power = DetectionPulsePower*((np.linspace(0.9, 1.1, 11)**2))  # 0.9..1.1 in 0.02 steps; a float arange's end point depends on rounding (G2-6.3)
 #~ Power = DetectionPulsePower*((np.arange(0.6,   1.01, 0.04))**2)
 print Power
 

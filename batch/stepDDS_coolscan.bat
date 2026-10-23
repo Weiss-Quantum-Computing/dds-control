@@ -27,7 +27,9 @@ for /F "usebackq tokens=1" %%i in ("%~1") do if "%%~xi"=="" (
     if not exist RAW%%i (set POINT=%%i)&(goto :compilefailed)
 )
 for /F "usebackq tokens=1" %%i in ("%~1") do if "%%~xi"=="" copy reset+RAW%%i %%i-final.txt > nul
-for /F "usebackq tokens=1" %%i in ("%~1") do if "%%~xi"=="" del RAW%%i %%i
+rem The point pulse files (frequency/power/length rows) are kept as the readable record of
+rem what each final file plays; only the intermediate RAW files are deleted (G2-1.4).
+for /F "usebackq tokens=1" %%i in ("%~1") do if "%%~xi"=="" del RAW%%i
 exit /b 0
 :compilefailed
 echo ERROR: compiling %POINT% failed or wrote no RAW%POINT%, see %POINT%.log - nothing assembled.

@@ -62,8 +62,16 @@ int main(int argc, char* argv[])
     unsigned int count=0;
     ifstream ppFile;
     ppFile.open(filename.c_str());
+    if (!ppFile)
+	{
+	cout << "ERROR: cannot open " << filename << endl;
+	return 2;
+	}
 
-    while(!ppFile.eof())
+    // Read hex words up to the end of the file. The old loop (while !eof: read, count++;
+    // then count--) dropped the last word, the end word, of a file without a trailing
+    // newline (review G2-11.4).
+    while (true)
     {
 
 	if (count>100*MAXDATA-1)
@@ -72,12 +80,26 @@ int main(int argc, char* argv[])
 		return 99;
 	    }
 
-    	ppFile >> hex >> data[count];
+    	if (!(ppFile >> hex >> data[count]))
+	    break;
         count++;
 
     }
+    if (!ppFile.eof()) // stopped on something that is not a hex word
+	{
+	ppFile.clear();
+	if (ppFile.get() != 0x1A) // DOS copy ends a file with Ctrl-Z
+	    {
+	    cout << "ERROR: unreadable word after word " << dec << count << " of " << filename << endl;
+	    return 2;
+	    }
+	}
     ppFile.close();
-    count--;
+    if (count == 0)
+	{
+	cout << "ERROR: no words in " << filename << endl;
+	return 2;
+	}
     int ioerror=0;
     cout<<"Before update(ms):"<<clock()*1000/CLOCKS_PER_SEC<<endl;
     ioerror = IO(data, count);
@@ -107,6 +129,9 @@ int main(int argc, char* argv[])
 
 
 
-    return (0);
+    // Non-zero exit when the DAQ write failed, so stepDDS.bat / ddsgui can tell a failed shot
+    // from a played one (it used to return 0 always; review G2-11.4). DAQmx errors are
+    // negative; positive values are warnings and the shot was played.
+    return (ioerror < 0 ? 3 : 0);
     }
 

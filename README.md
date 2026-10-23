@@ -50,7 +50,11 @@ firmware/                       C++ sources (built with MinGW GCC via Eclipse CD
   NewDDS2-Cooling2.0-Cal/       pulse compiler (microwave)
   NewDDS2-Cooling2.0-Cal-V2/    pulse compiler + extra pulse types (12-17)
   NewDDS2-Cooling2.0-RF/        RF-channel variant
-  legacy/                       earlier compiler generations, for reference
+  legacy/                       earlier generations, for reference only - DO NOT BUILD:
+                                most call IO() and play on the DAQ card directly, with the
+                                2010-11 power tables (POWMAX 0.745 W) and, in version-3.0,
+                                a 100 kHz FIFO clock; their Eclipse names are legacy-<folder>
+                                so they cannot build a NewDDS2*.exe
 scripts/                        Python pulse-sequence generators
   hardware/                     picomotor / serial-port helpers (ldcnlib, etc.)
   legacy/                       older cooling_control.py generation

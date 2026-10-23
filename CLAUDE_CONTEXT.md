@@ -66,11 +66,11 @@ before assuming it's applied.
 
 ## Deployment / build gotchas (Windows + Eclipse CDT + MinGW)
 
-- **Eclipse project name ≠ folder name for `NewDDS2-Cooling2.0-Cal`.**
-  Its internal Eclipse project is named `NewDDS2`, so it builds to
-  `NewDDS2.exe` — must be manually renamed to `NewDDS2-Cooling2.0-Cal.exe`
-  before deploying. `Cal-V2`'s project name matches its folder and needs
-  no rename.
+- **Eclipse project names now match the folder names** (Oct 2026). The run
+  program `NewDDS2-Cooling2.0` and the compiler `NewDDS2-Cooling2.0-Cal` were
+  both named `NewDDS2` and both built `NewDDS2.exe` (review G2-12.1); each
+  project now builds `<folder>.exe`, no rename. Re-import the two folders in
+  an Eclipse workspace that still lists them as `NewDDS2`.
 - **Requires NI-DAQmx (ANSI C Dev SDK)** installed at
   `C:\Program Files\National Instruments\NI-DAQ\DAQmx ANSI C Dev\` — both
   `include/` and `lib/msvc/` are referenced in the `.cproject` files.

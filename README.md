@@ -76,10 +76,14 @@ docs/                           programming guide, manual, setup drawing
 ## Building the firmware (Eclipse)
 
 Import a project, select the **Release** build configuration, then
-Project → Clean → Build. Note that the `NewDDS2-Cooling2.0-Cal` project's
-internal Eclipse name is `NewDDS2`, so it builds to `NewDDS2.exe` — rename the
-output to `NewDDS2-Cooling2.0-Cal.exe` before deploying. The other projects
-build to their folder name.
+Project → Clean → Build. Every current project's Eclipse name (`.project`) is its
+folder name, and the `.cproject` files build `${ProjName}.exe`, so each builds to
+`<folder>.exe` and needs no rename. (Until Oct 2026 the run program and the Cal
+compiler were both named `NewDDS2` and both built `NewDDS2.exe`: copying the wrong
+one to `NewDDS2-Cooling2.0.exe` would make `stepDDS.bat` compile every final file
+instead of playing it, and `fc /b` would not notice. If a workspace still has the
+old `NewDDS2` entries, remove them from the workspace (not from disk) and
+re-import the folders.)
 
 After building, verify a new compiler produces byte-identical output to the one
 it replaces by running both on the same input and comparing the `RAW` files

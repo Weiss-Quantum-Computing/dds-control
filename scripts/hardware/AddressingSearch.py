@@ -5,7 +5,7 @@
 # TODO add support for PI translation stage
 # Using absolute position coodinates, need to test
 
-import serial, sys, subprocess
+import sys, subprocess  # (pyserial's 'import serial' was unused; the LDCN DLL opens the port)
 from time import sleep
 import ldcnlib as L #wrappers for ldcn library (picomotor DLL control)
 #from winsound import Beep
@@ -13,6 +13,7 @@ import ldcnlib as L #wrappers for ldcn library (picomotor DLL control)
 # Constants
 # Search parameters
 DDSCMD = r'C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0.exe C:\Users\Yang\Documents\Data\DDScontrol\20130125\address005-001-final.txt' #command to send to OS for running the DDS once
+# NOTE (review G2-9.2): this plays a 2013 final file; point it at the current addressing final before use.
 REPEATS = 3 # number of shots at each picomotor position
 MAXSIZE = 9 # max edge size of the search pattern
 
@@ -106,7 +107,7 @@ def main():
     L.StepResetPos(DRIVER) # Reset position counter to zero (Do we need this?)
     #Beep(500,300)
     L.StepLoadTraj(DRIVER,7,-1*coordlist[steps][1]*YSTEPS,VEL,MAXACCEL,0) #load motion
-    print("Moving channel {0:d} by {1:d} steps.".format(YCH,-1*coordlist[steps][0]*YSTEPS))
+    print("Moving channel {0:d} by {1:d} steps.".format(YCH,-1*coordlist[steps][1]*YSTEPS))  # [1] = Y, as the move
     L.ServoStartMotion(DRIVER)
     #while (L.LdcnGetStat(DRIVER) & 1): # wait while moving (Status bit 0 is high)
     sleep(abs(coordlist[steps][1])*MOVEWAIT) 

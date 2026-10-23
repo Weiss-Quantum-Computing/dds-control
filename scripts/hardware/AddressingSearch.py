@@ -61,29 +61,29 @@ def main():
         
         # move the picomotor
         L.LdcnNoOp(DRIVER) # ping the driver
-	L.StepGetPos(DRIVER) # read position
+        L.StepGetPos(DRIVER) # read position
         L.StepSetOutputs(DRIVER,movelist[m][0]) # Choose motor
         L.StepStopMotor(DRIVER,9) #stop smoothly, motor on
-	L.StepSetParam(DRIVER,MULT+4,0,0,0,0,0)
+        L.StepSetParam(DRIVER,MULT+4,0,0,0,0,0)
         L.StepSetOutputs(DRIVER,movelist[m][0]) # Choose motor
         L.StepResetPos(DRIVER) # Reset position counter to zero (Do we need this?)
-	L.LdcnNoOp(DRIVER)
+        L.LdcnNoOp(DRIVER)
         L.StepGetPos(DRIVER)
-	print("Moving channel {0:d} by {1:d} steps.".format(movelist[m][0],movelist[m][1]))
+        print("Moving channel {0:d} by {1:d} steps.".format(movelist[m][0],movelist[m][1]))
         #Beep(500,300)
-	L.StepLoadTraj(DRIVER,7,movelist[m][1],VEL,MAXACCEL,0) #load motion
+        L.StepLoadTraj(DRIVER,7,movelist[m][1],VEL,MAXACCEL,0) #load motion
         L.ServoStartMotion(DRIVER)
         #while (L.LdcnGetStat(DRIVER) & 1): # wait while moving (Status bit 0 is high)
-	sleep(MOVEWAIT) 
-	L.LdcnNoOp(DRIVER)
+        sleep(MOVEWAIT) 
+        L.LdcnNoOp(DRIVER)
         print("Steps moved: {0:d}".format(L.StepGetPos(DRIVER)))
         L.StepStopMotor(DRIVER,8) #stop smoothly, motor off
-	
+        
         for s in xrange(0,REPEATS):
             totalshots = totalshots + 1
             print("Shot {0:d} of {1:d}, total {2:d}".format(s+1,REPEATS,totalshots,REPEATS*steps))
             subprocess.check_call(DDSCMD) #call the DDS executable and wait
-	    sleep(0.3)
+            sleep(0.3)
     print("Sequence complete, {0:d} shots total".format(totalshots))
     print("Moving back to origin")
     # move the picomotor

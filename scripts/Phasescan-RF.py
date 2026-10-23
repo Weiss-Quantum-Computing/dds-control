@@ -18,7 +18,7 @@ DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit f
 # Refuse to run in DDScontrol itself: the clean-up at the end deletes 'reset', which there
 # is the master copy that every bat splices into the final files (review G2-2.1).
 if os.path.normcase(os.path.abspath(os.getcwd())) == os.path.normcase(DDSDIR):
-	sys.exit('ERROR: run this script from a data folder below DDScontrol, not in ' + DDSDIR)
+        sys.exit('ERROR: run this script from a data folder below DDScontrol, not in ' + DDSDIR)
 FilenameHead = 'Phasescan-RF'   # filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
 print('Pulse file comment line: ' + FileComment.strip())
@@ -144,101 +144,101 @@ fRF = get_rf_freq()
 
 HideUnusedSettings = 1
 if (HideUnusedSettings == 1):
-	f11=60200304.8   # 3,1->4,1 calculated
-	#~ deltaf = 52.6316e3    #  f0 - f304M1 for matching the uwave phase, 2014.05.07
-	f304P1=60060974-0.45e3-1.4e3		 # 30->4,1, low field 
-	#~ P3040_200us_Pi=0.4096  # 2014-7-14, low field 
-	#~ P3040_200us_Pi= 0.366  # 2014-8-11
-	#~ P3040_200us_Pi= 0.40328# 2014-8-27
-	#~ P3040_200us_Pi=	0.409  # 2014-9-3
-	P3040_200us_Pi=  0.442895829  # 9.15
+        f11=60200304.8   # 3,1->4,1 calculated
+        #~ deltaf = 52.6316e3    #  f0 - f304M1 for matching the uwave phase, 2014.05.07
+        f304P1=60060974-0.45e3-1.4e3		 # 30->4,1, low field 
+        #~ P3040_200us_Pi=0.4096  # 2014-7-14, low field 
+        #~ P3040_200us_Pi= 0.366  # 2014-8-11
+        #~ P3040_200us_Pi= 0.40328# 2014-8-27
+        #~ P3040_200us_Pi=	0.409  # 2014-9-3
+        P3040_200us_Pi=  0.442895829  # 9.15
 
-	#~ P3040_200us_Pi=0.4 # 2014-7-14, low field 
+        #~ P3040_200us_Pi=0.4 # 2014-7-14, low field 
 
-	P304P1_200us=0.71  #2014-7-7
-	P304P1_150us=1.332  #2014-7-8
-	P304P1_100us=3.11  #2014-7-23
-	P304P1_300us=0.308  #2014-7-24
-	P3P14P1_150us=0.637  # 2014-8-12
+        P304P1_200us=0.71  #2014-7-7
+        P304P1_150us=1.332  #2014-7-8
+        P304P1_100us=3.11  #2014-7-23
+        P304P1_300us=0.308  #2014-7-24
+        P3P14P1_150us=0.637  # 2014-8-12
 
-	#~ P3P14P1_150usHalf= 0.2274 # 2014-9-5
-	P3P14P1_150usHalf= 0.2146 # 2014-9-15
+        #~ P3P14P1_150usHalf= 0.2274 # 2014-9-5
+        P3P14P1_150usHalf= 0.2146 # 2014-9-15
 
-	#~ dfZeeman=39.674e3	#+  Zeeman spliting	# 2014.9.5
-	dfadd =  26.0e3   # AC shift due to addressing beam
-	#~ dfZeeman=60e3	#+  Zeeman spliting	# 2014.91.5
+        #~ dfZeeman=39.674e3	#+  Zeeman spliting	# 2014.9.5
+        dfadd =  26.0e3   # AC shift due to addressing beam
+        #~ dfZeeman=60e3	#+  Zeeman spliting	# 2014.91.5
 
-	delta=86.869e3 #  (For dfadd =  27e3) 2014.9.16
+        delta=86.869e3 #  (For dfadd =  27e3) 2014.9.16
 
 
-	#~ P3P14P1_150us=1.555  	# 2014-9-22
-	#~ P304P1_300us=0.605   	# 2014-9-22
-	#~ P3040_200us_Pi= 0.8	# 2014-9-22
+        #~ P3P14P1_150us=1.555  	# 2014-9-22
+        #~ P304P1_300us=0.605   	# 2014-9-22
+        #~ P3040_200us_Pi= 0.8	# 2014-9-22
 
-	#~ P3040_200us_Pi=0.52   #  2014.9.26
-	P3040_200us_Pi=0.4  # 2014.10.10
-	P3040_200us_Pi= 0.4016  # 2014.10.15
-	P3P14P1_150us=	0.8427	#  2014.9.26
-	P3P14P1_80us=	3.33   # 2014.10.21
-	P3P14P1_60us=	5.53   # 2014.10.21
-	#~ P3P14P1_150us=	0.794	#  2014.10.14
-	#~ P304P1_300us= 0.3655 	#  2014.9.26
-	P304P1_300us=  	0.372  #  2014.10.16
-	#~ dfZeeman	=65770#+  Zeeman spliting	# 2014.9.29
-	#~ dfZeeman	=60.150e3	#+  Zeeman spliting	# 2014.10.11
+        #~ P3040_200us_Pi=0.52   #  2014.9.26
+        P3040_200us_Pi=0.4  # 2014.10.10
+        P3040_200us_Pi= 0.4016  # 2014.10.15
+        P3P14P1_150us=	0.8427	#  2014.9.26
+        P3P14P1_80us=	3.33   # 2014.10.21
+        P3P14P1_60us=	5.53   # 2014.10.21
+        #~ P3P14P1_150us=	0.794	#  2014.10.14
+        #~ P304P1_300us= 0.3655 	#  2014.9.26
+        P304P1_300us=  	0.372  #  2014.10.16
+        #~ dfZeeman	=65770#+  Zeeman spliting	# 2014.9.29
+        #~ dfZeeman	=60.150e3	#+  Zeeman spliting	# 2014.10.11
 
-	#~ dfZeeman=60.721e3  # Zeeman spliting	# 2014.10.13
-	#~ dfZeeman=95854.96 # Zeeman spliting	# 2014.11.13
-	#~ dfZeeman=187180.6078 #2014.10.14 Strong Field
-	#~ dfZeeman2 =375876.97216 #2014.10.14 Strong Field
-	#~ dfZeeman=187.146e3   # 2014.10.14  Zeeman
-	#~ delta=dfZeeman	#+28e3	#-0.5e3
+        #~ dfZeeman=60.721e3  # Zeeman spliting	# 2014.10.13
+        #~ dfZeeman=95854.96 # Zeeman spliting	# 2014.11.13
+        #~ dfZeeman=187180.6078 #2014.10.14 Strong Field
+        #~ dfZeeman2 =375876.97216 #2014.10.14 Strong Field
+        #~ dfZeeman=187.146e3   # 2014.10.14  Zeeman
+        #~ delta=dfZeeman	#+28e3	#-0.5e3
 
-	#~ dfZeeman=93347.06 # Zeeman spliting	# 2015.1.20
+        #~ dfZeeman=93347.06 # Zeeman spliting	# 2015.1.20
 
-	dfZeeman=200886-0.6e3	# for normal B field #2015.9.9
-	#~ dfZeeman=371040 - 2.3e3  # for strong B field, 2015.3.17 
+        dfZeeman=200886-0.6e3	# for normal B field #2015.9.9
+        #~ dfZeeman=371040 - 2.3e3  # for strong B field, 2015.3.17 
 
-	#~ P304P1_150us=1.28         # 2014.9.29
+        #~ P304P1_150us=1.28         # 2014.9.29
 
-	#~ P3040_200us_Pi= 0.4761  # 2014.11.4
-	#~ P3040_100us_Pi=1.917  # 2014.11.6
-	#~ P3040_200us_Pi=0.6889 # 2014.11.9
-	#~ P3040_200us_Pi=0.6937  # 2014.11.13
+        #~ P3040_200us_Pi= 0.4761  # 2014.11.4
+        #~ P3040_100us_Pi=1.917  # 2014.11.6
+        #~ P3040_200us_Pi=0.6889 # 2014.11.9
+        #~ P3040_200us_Pi=0.6937  # 2014.11.13
 
-	P304P1_300us=  	0.585  #  2014.11.13
-	P3P14P1_120us=2.074 # 2014.11.16
-	#~ P304P1_300us=  	0.5  #  2014.11.21
+        P304P1_300us=  	0.585  #  2014.11.13
+        P3P14P1_120us=2.074 # 2014.11.16
+        #~ P304P1_300us=  	0.5  #  2014.11.21
 
-	P3P14P1_120us=2.232 # 2014.11.26
-	P3040_200us_Pi=0.7396  # 2014.11.25
-	P304P1_300us=  	0.47  #  2014.11.26
-	P304P1_600us=  	0.2047 #2014.12.10
-	P3040_200us_Pi=0.7656  # 2015.01.08
-	P3040_100us_Pi=3.1819  # 2015.01.09
-	P3040_50us_Pi_square = 2.9756  # 2015.01.09
-	P3040_75us_Pi = 6.067  # 2015.01.09
-	P3040_50us_Pi_square = 3.35315 # 2015.01.12
-	#~ P3040_90us_Pi = 4.12168 # 2015.01.13
-	#~ P3040_90us_Pi = 4.014 # 2015.01.14-0.125
-	#~ P3040_90us_Pi = 4.0235 # 2015.01.15
-	#~ P3040_90us_Pi =  3.85786313 #2015.04.24 normal B field 400mG
+        P3P14P1_120us=2.232 # 2014.11.26
+        P3040_200us_Pi=0.7396  # 2014.11.25
+        P304P1_300us=  	0.47  #  2014.11.26
+        P304P1_600us=  	0.2047 #2014.12.10
+        P3040_200us_Pi=0.7656  # 2015.01.08
+        P3040_100us_Pi=3.1819  # 2015.01.09
+        P3040_50us_Pi_square = 2.9756  # 2015.01.09
+        P3040_75us_Pi = 6.067  # 2015.01.09
+        P3040_50us_Pi_square = 3.35315 # 2015.01.12
+        #~ P3040_90us_Pi = 4.12168 # 2015.01.13
+        #~ P3040_90us_Pi = 4.014 # 2015.01.14-0.125
+        #~ P3040_90us_Pi = 4.0235 # 2015.01.15
+        #~ P3040_90us_Pi =  3.85786313 #2015.04.24 normal B field 400mG
 
-	P3040_90us_Pi= 3.3525#2015.05.7
-	P3040_30us_Pi_Square=3.2  # 2015.5.10, pi pulse power for 30use pulse
-	P3040_90us_Pi= 3.3525	#2015.05.7
-	P3040_80us_Pi=2.84  # 2015-5-17
+        P3040_90us_Pi= 3.3525#2015.05.7
+        P3040_30us_Pi_Square=3.2  # 2015.5.10, pi pulse power for 30use pulse
+        P3040_90us_Pi= 3.3525	#2015.05.7
+        P3040_80us_Pi=2.84  # 2015-5-17
 
-	P304P1_120us=1.738   # 2015.5.22
-	P304P1_240us=0.396   # 2015.5.25
+        P304P1_120us=1.738   # 2015.5.22
+        P304P1_240us=0.396   # 2015.5.25
 
-	#~ P4433_240= 0.1886547	# 2017.1.16
-	#~ P4433_120= 0.831744 # 2017.1.16
-	P4433_240=0.06	# 2017.5.11
-	P4433_120= 0.1964 # 2017.10.16
-	P4433_80 = 0.4667792 # 2017.10.26
-	P304P1_300us=0.35  # 2015.9.1
-	PM4433_240= 0.0678
+        #~ P4433_240= 0.1886547	# 2017.1.16
+        #~ P4433_120= 0.831744 # 2017.1.16
+        P4433_240=0.06	# 2017.5.11
+        P4433_120= 0.1964 # 2017.10.16
+        P4433_80 = 0.4667792 # 2017.10.26
+        P304P1_300us=0.35  # 2015.9.1
+        PM4433_240= 0.0678
 test = 5e3	# 2017.02.03 Debug DDS
  
 P= 1.15/4                         # 1.58 Pi pulse, 0.37 Pi/2 pulse
@@ -329,10 +329,10 @@ Phase = np.arange(StartingPhase, StoppingPhase+PhaseStepSize/2.0, \
 NumberOfFiles = len(Phase)
 
 if NumberOfFiles > 1:
-	print('Phase scan: %.3f to %.3f pi, %d points (step %.4f pi)' \
-		% (Phase[0], Phase[-1], NumberOfFiles, Phase[1]-Phase[0]))
+        print('Phase scan: %.3f to %.3f pi, %d points (step %.4f pi)' \
+                % (Phase[0], Phase[-1], NumberOfFiles, Phase[1]-Phase[0]))
 else:
-	print('Single-point phase scan at %.3f pi' % Phase[0])
+        print('Single-point phase scan at %.3f pi' % Phase[0])
 
 #~ Phase= np.arange (0,2.01,0.2)  #phase in units of pi
 #~ NumberOfFile7+5coolis = len(Phase)
@@ -344,7 +344,7 @@ for i in xrange(0,NumberOfFiles):
 Coolfilename = FilenameHead+'-Cool'
 MeasListFilename = FilenameHead+'-Meas'
 ScanFilename = FilenameHead+'.scan'
-	
+        
 ListFilename = FilenameHead +'.lst'
 
 # Write Cooling file
@@ -383,8 +383,8 @@ writer.writerow([58.0e6, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
 #~ P = 0.0
 #~ writer.writerow([f4new, -8000, 3, 0.1,  1, '4,4->3,3'])
 #~ for i in range(0,9):
-	#~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3']) # 2014.10.10, old power is 0.05W 
-	#~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3'])
+        #~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3']) # 2014.10.10, old power is 0.05W 
+        #~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3'])
 #~ writer.writerow([f4new, hsr, 3, 0.1,  1, '4,4->3,3'])
 #~ writer.writerow([f4new, -8000, 3, P,  1, '4,4->3,3'])
 #~ writer.writerow([f2p, -6000, 3, 1.6*1.5*0.7,  1, '3,3->4,2']) # 2014.10.10: 1.5W 
@@ -395,7 +395,7 @@ writer.writerow([58.0e6, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
 #~ writer.writerow([fclock,0, 0.12,0,  2, 'dummy']) # 2014.10.10: 025W 
 
 #~ for i in range(0,129):
-	 #~ writer.writerow([fclock, 0, 0.03, P3040_30us_Pi_Square,  3, 'PI'])
+         #~ writer.writerow([fclock, 0, 0.03, P3040_30us_Pi_Square,  3, 'PI'])
 
 #~ writer.writerow([fclock+dfZeeman, 0, 0.24, P304P1_240us,  2, 'test'])
 #~ writer.writerow([fclock, -6000, 3, 1.6*0.7,  1, '3,0->4,0'])
@@ -405,13 +405,13 @@ pulsefile.close() # Close the cooling pulse file
 
 rc = os.system('copy '+Coolfilename+' Gate')
 if rc != 0:
-	print('ERROR: copy %s -> Gate failed with exit %d. Aborting.' % (Coolfilename, rc))
-	sys.exit(1)
+        print('ERROR: copy %s -> Gate failed with exit %d. Aborting.' % (Coolfilename, rc))
+        sys.exit(1)
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
 rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'Gate'])
 if rc != 0:
-	print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal.exe) failed with exit %d. Aborting.' % rc)
-	sys.exit(1)
+        print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal.exe) failed with exit %d. Aborting.' % rc)
+        sys.exit(1)
 print('Cooling pulse file compiled successfully (Gate).')
 
 # begin loop to write the detection pulse files    
@@ -451,7 +451,7 @@ for i in xrange(0,len(Phase)):
 #~ ##For only one pulse##    
     #~ for x in xrange(0,DetRepeats):
         #~ writer.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
-	#~ writer.writerow([Frequency, \
+        #~ writer.writerow([Frequency, \
                         #~ DetectionPulseHSR, \
                         #~ DetectionPulseLength, \
                         #~ Power[i], \
@@ -460,23 +460,23 @@ for i in xrange(0,len(Phase)):
     #~ pulsefile.close() # Close the pulse file
     #~ writerm.writerow([Filenames[i]])
     #~ for x in xrange(0,DetRepeats):
-	#~ writerm.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
+        #~ writerm.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
         #~ writerm.writerow([Frequency, \
                         #~ DetectionPulseHSR, \
                         #~ DetectionPulseLength, \
                         #~ Power[i], \
                         #~ DetectionPulseType, \
                          #~ 'Measure'])
-			 
-			 
-			 
+                         
+                         
+                         
 
 #~ ##For n pulses##
     #~ n=8
     #~ for x in xrange(0,DetRepeats):
-	#~ writer.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
-	#~ for y in xrange(0,n):
-		#~ writer.writerow([Frequency, \
+        #~ writer.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
+        #~ for y in xrange(0,n):
+                #~ writer.writerow([Frequency, \
                         #~ DetectionPulseHSR, \
                         #~ DetectionPulseLength, \
                         #~ Power[i], \
@@ -485,33 +485,33 @@ for i in xrange(0,len(Phase)):
     #~ pulsefile.close() # Close the pulse file
     #~ writerm.writerow([Filenames[i]])
     #~ for x in xrange(0,DetRepeats):
-	#~ writerm.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
-	#~ for y in xrange(0,n):
-		#~ writerm.writerow([Frequency, \
+        #~ writerm.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
+        #~ for y in xrange(0,n):
+                #~ writerm.writerow([Frequency, \
                         #~ DetectionPulseHSR, \
                         #~ DetectionPulseLength, \
                         #~ Power[i], \
                         #~ DetectionPulseType, \
                          #~ 'Measure'])
-			 
-			 
-		
+                         
+                         
+                
 #~ # used for scanning the frequency jump 
     for x in xrange(0,DetRepeats):
         writer.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
-	writer.writerow([Frequency, \
+        writer.writerow([Frequency, \
                         DetectionPulseHSR, \
                         DetectionPulseLength, \
                         P, \
                         DetectionPulseType, \
                         'Measure'])
-	writer.writerow([Frequency, \
+        writer.writerow([Frequency, \
                         DetectionPulseHSR2, \
                         DetectionPulseLength2, \
                         DetectionPulsePower2, \
                         DetectionPulseType, \
                         'Measure'])
-	writer.writerow([Frequency, \
+        writer.writerow([Frequency, \
                         Phase[i], \
                         DetectionPulseLength, \
                         P, \
@@ -520,14 +520,14 @@ for i in xrange(0,len(Phase)):
     pulsefile.close() # Close the pulse file
     writerm.writerow([Filenames[i]])
     for x in xrange(0,DetRepeats):
-	writerm.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
+        writerm.writerow([0, 0.0, 10.0, 0., 1, 'Dummy']) # Dummy pulse
         writerm.writerow([Frequency, \
                         DetectionPulseHSR, \
                         DetectionPulseLength, \
                         P, \
                         DetectionPulseType, \
                          'Measure'])
-	writerm.writerow([Frequency, \
+        writerm.writerow([Frequency, \
                         DetectionPulseHSR2, \
                         DetectionPulseLength2, \
                         DetectionPulsePower2, \
@@ -539,7 +539,7 @@ for i in xrange(0,len(Phase)):
                         P, \
                         DetectionPulseType, \
                          'Measure'])
-			 
+                         
 measfile.close()      
 
 # begin to write the cooling pulse files   
@@ -563,15 +563,15 @@ scanfile.close()
 print('Compiling %d pulse files (stepDDS_cal3_RF.bat)...' % NumberOfFiles)
 rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3_RF.bat'), 'List'])
 if rc != 0:
-	print('ERROR: stepDDS_cal3_RF.bat failed with exit %d. Aborting.' % rc)
-	sys.exit(1)
+        print('ERROR: stepDDS_cal3_RF.bat failed with exit %d. Aborting.' % rc)
+        sys.exit(1)
 #print('After batch file')
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_copy.bat List")
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_delete.bat List")
 #os.system("del Cool List RAWCool")
 if DelTempFiles == 1 :
-	print('Deleting temp files: %s, Gate, List, reset' % Coolfilename)
-	os.system("del "+Coolfilename+" Gate List reset")	
+        print('Deleting temp files: %s, Gate, List, reset' % Coolfilename)
+        os.system("del "+Coolfilename+" Gate List reset")	
 
 listfile = open(ListFilename, "wb")
 for j in xrange(0,NumberOfRepeats):
@@ -580,7 +580,7 @@ for j in xrange(0,NumberOfRepeats):
 listfile.close()                 
             
 print('Scan list %s: %d files x %d repeats = %d scans total' \
-	% (ListFilename, NumberOfFiles, NumberOfRepeats, NumberOfFiles*NumberOfRepeats))
+        % (ListFilename, NumberOfFiles, NumberOfRepeats, NumberOfFiles*NumberOfRepeats))
                     
 os.system("copy "+sys.argv[0]+" "+FilenameHead+".py") # save a copy of this python file
 os.system("copy "+FilenameHead+".lst last-RF.lst") # copy list file to last.lst

@@ -49,7 +49,8 @@ const int REFUSED = 2;
 // Why a pulse row cannot be compiled faithfully, or 0 if it can. main() checks every row
 // before compiling anything: these rows used to compile into a wrong but well-formed RAW
 // file with exit code 0 (review 2026-10-15).
-static const char * BadPulseRow(const int type, const double power)
+static const char * BadPulseRow(const int type, const double length, const double wait,
+	const double power)
     {
     switch (type) // the cases of the switch in main()
 	{
@@ -64,6 +65,34 @@ static const char * BadPulseRow(const int type, const double power)
 	return "power is negative";
     if (power > (double) POWMAX)
 	return "power is above POWMAX, the top of the power calibration table";
+    // Lengths: a negative one wraps in Time2Tics, and the classes below allocate
+    // Time2Tics(k*length) tics and then write tic 0, i.e. into a zero-length array
+    // when the pulse is too short (review G2-11.5; a zero-length AFP crashed the compiler).
+    if (!(length >= 0.0))
+	return "length is negative";
+    switch (type)
+	{
+    case 1: case 13: case 16: // PAdiabatic / PChirpedSquare / PSquareFreqChange: Time2Tics(length) tics
+	if (Time2Tics(length) < 1)
+	    return "length is below 8 us: the pulse would have zero tics";
+	break;
+    case 12: case 14: // PFlatBlackman / PChirpedFlatBlackman: Time2Tics(2*length) tics
+	if (Time2Tics(2.0 * length) < 1)
+	    return "length is below 4 us: the pulse would have zero tics";
+	break;
+    case 2: case 17: // PBlackman: 1+Time2Tics(4*length) tics, no envelope below 2 us
+	if (Time2Tics(4.0 * length) < 1)
+	    return "length is below 2 us: the Blackman would have no envelope samples";
+	break;
+    case 6: case 7: case 8: // the HSR column is a wait (ms) for these
+	if (!(wait >= 0.0))
+	    return "wait (HSR column) is negative";
+	break;
+    case 10: // PRamseyPhase sizes its pulses from 1/sqrt(power)
+	if (!(power > 0.0))
+	    return "RamseyPhase needs a power above 0 W";
+	break;
+	}
     return 0;
     }
 
@@ -165,7 +194,9 @@ int main(int argc, char* argv[])
 	unsigned int bad = 0;
 	for (unsigned int num = 0; num < totalnum; num++)
 	    {
-	    const char * why = BadPulseRow(int(parameters[num][4]), (double) parameters[num][3]);
+	    const char * why = BadPulseRow(int(parameters[num][4]),
+		(double) (parameters[num][2] * 0.001), (double) (parameters[num][1] * 0.001), // as main computes them
+		(double) parameters[num][3]);
 	    if (why)
 		{
 		cout << "ERROR: pulse " << dec << num+1 << " (type " << int(parameters[num][4])

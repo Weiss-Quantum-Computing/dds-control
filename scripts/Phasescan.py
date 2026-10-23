@@ -678,12 +678,16 @@ print('Cooling pulse file compiled successfully (Gate).')
 measfile = open(MeasListFilename, "wb")                  
 measfile.write(FileComment)                  
 writerm = csv.writer(measfile, dialect='excel-tab')
+def writerow_both(w, row):  # write one pulse row to both the given pulse file writer and the meas log
+	w.writerow(row)
+	writerm.writerow(row)
 for i in xrange(0,len(Phase)):
 #~ for i in xrange(0,len(Phase)):
     print('Writing pulse file %s: phase %.3f pi' % (Filenames[i], Phase[i]))
     pulsefile = open(Filenames[i], "wb") # open pulse file
     pulsefile.write(FileComment) # write comment line
     writer = csv.writer(pulsefile, dialect='excel-tab') # define the file format
+    writerm.writerow([Filenames[i]])  # meas-log header: which point file these rows belong to
 
     #~ # Measurement pulse
     #~ writer.writerow([StartingFrequency, \
@@ -1041,13 +1045,13 @@ for i in xrange(0,len(Phase)):
 
 #~ # used for checking the coherence to 42 with SUPERTIME
     for x in xrange(0,DetRepeats):
-        writer.writerow([Frequency0, \
+        writerow_both(writer, [Frequency0, \
                         0, \
                         DetectionPulseLength, \
                         DetectionPulsePower, \
                         DetectionPulseType, \
                         'Measure'])
-	writer.writerow([f3P1to4P1new, 0, 0.12, 0.678, 2, '4,1 -> 3,1'])
+	writerow_both(writer, [f3P1to4P1new, 0, 0.12, 0.678, 2, '4,1 -> 3,1'])
 	#~ writer.writerow([f3P2to4P3new, 0, 0.12,0.64, 2, '4,1 -> 3,2'])
 	#~ writer.writerow([f4P3to3P3new, 0, 0.24,0.262, 2, '4,1 -> 3,2'])
 	#~ writer.writerow([f42to31new, 0, 0.12, 0.73, 2, '4,1 -> 3,2'])
@@ -1058,7 +1062,7 @@ for i in xrange(0,len(Phase)):
 			#~ 0, \
 			#~ 3, \
 			#~ 'Measure'])
-	writer.writerow([f3P1to4P1new, 0, 0.12, 0.678, 2, '4,1 -> 3,1'])
+	writerow_both(writer, [f3P1to4P1new, 0, 0.12, 0.678, 2, '4,1 -> 3,1'])
 	#~ writer.writerow([f4P3to3P3new, 1, 0.24,0.262, 2, '4,1 -> 3,2'])
 	#~ writer.writerow([f3P2to4P3new, 1, 0.12,0.64, 2, '4,1 -> 3,2'])
 	#~ writer.writerow([f4P1to3P2new, 1, 0.24, 0.80, 2, '4,1 -> 3,1'])
@@ -1070,13 +1074,13 @@ for i in xrange(0,len(Phase)):
                         #~ 0, \
                         #~ 3, \
                         #~ 'Measure'])
-	writer.writerow([Frequency0, \
+	writerow_both(writer, [Frequency0, \
                         0.0, \
                         DetectionPulseLength, \
                         DetectionPulsePower, \
                         DetectionPulseType, \
                         'Measure'])
-	writer.writerow([f3P1to4P1new, 0, 0.12, 0.678, 2, '4,1 -> 3,1'])
+	writerow_both(writer, [f3P1to4P1new, 0, 0.12, 0.678, 2, '4,1 -> 3,1'])
 	#~ writer.writerow([f4P1to3P2new, 0, 0.24, 0.80, 2, '4,1 -> 3,1'])
 	#~ writer.writerow([f3P2to4P3new, 0, 0.12,0.64, 2, '4,1 -> 3,2'])
 	#~ writer.writerow([f4P3to3P3new, 0, 0.24,0.262, 2, '4,1 -> 3,2'])
@@ -1088,7 +1092,7 @@ for i in xrange(0,len(Phase)):
                         #~ 0, \
                         #~ 3, \
                         #~ 'Measure'])
-	writer.writerow([f3P1to4P1new, 0, 0.12, 0.678, 2, '4,1 -> 3,1'])
+	writerow_both(writer, [f3P1to4P1new, 0, 0.12, 0.678, 2, '4,1 -> 3,1'])
 	#~ writer.writerow([f4P3to3P3new, 1, 0.24,0.262, 2, '4,1 -> 3,2'])
 	#~ writer.writerow([f3P2to4P3new, 1, 0.12,0.64, 2, '4,1 -> 3,2'])
 	#~ writer.writerow([f4P1to3P2new, 1, 0.24, 0.80, 2, '4,1 -> 3,1'])
@@ -1100,31 +1104,27 @@ for i in xrange(0,len(Phase)):
                         #~ 0, \
                         #~ 3, \
                         #~ 'Measure'])
-        writer.writerow([Frequency0, \
+        writerow_both(writer, [Frequency0, \
                         Phase[i], \
                         DetectionPulseLength, \
                         DetectionPulsePower, \
                         DetectionPulseType, \
                         'Measure'])
 	#~ writer.writerow([f33to42new, -6e3, 3.0, P33to42new*64/36, 1, '3,-3 -> 4,-2']) 
-	writer.writerow([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1']) 
+	writerow_both(writer, [f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,-1']) 
 	#~ writer.writerow([f42to31new, -6e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,1'])
-	writer.writerow([f4P1to3P2new, -6e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
-	writer.writerow([f3P2to4P3new, -6e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])	
+	writerow_both(writer, [f4P1to3P2new, -6e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
+	writerow_both(writer, [f3P2to4P3new, -6e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])	
 	#~ writer.writerow([f31to40new, -6e3, 3.0, P31to40new*4, 1, '3,-1 -> 4,0'])
 	#~ writer.writerow([f42to31new, -6e3, 3.0, P42to31new*4, 1, '4,-2 -> 3,-1']) 
 	#~ writer.writerow([f33to42new, 1, 0.36,1.43, 2, '4,1 -> 3,2'])
 	#~ writer.writerow([f42to31new, 1, 0.12,0.82, 2, '4,1 -> 3,2'])
     pulsefile.close() # Close the pulse file
     
-    writerm.writerow([Filenames[i]])
-    for x in xrange(0,DetRepeats):
-	writerm.writerow([Frequency0, \
-                        0, \
-                        DetectionPulseLength, \
-                        DetectionPulsePower, \
-                        DetectionPulseType, \
-                        'Measure'])
+    # -Meas log: writerow_both above writes every played row to it, so it now lists exactly
+    # the pulses of the point file. It used to log 3 rows here: the 0-phase and Phase[i]
+    # square pulses plus a phase-0.5, 4x-power one that is not played, and none of the
+    # Blackman / AFP rows (review G2-4.1). The old meas-log variants, for reference:
 	#~ writerm.writerow([f4P1to3P2new, 0, 0.24,1.05, 2, '4,1 -> 3,2'])
 	#~ writerm.writerow([f3P2to4P3new, 0, 0.12,0.62, 2, '4,1 -> 3,2'])
 	#~ writerm.writerow([f4P3to3P3new, 0, 0.12,1.64, 2, '4,1 -> 3,2'])
@@ -1141,12 +1141,6 @@ for i in xrange(0,len(Phase)):
 	#~ writerm.writerow([f4P1to3P2new, 1, 0.24,1.05, 2, '4,1 -> 3,2'])
 	#~ writerm.writerow([f33to42new, 1, 0.24,3.5, 2, '4,1 -> 3,2'])
 	#~ writerm.writerow([f42to31new, 1, 0.12,0.74, 2, '4,1 -> 3,2'])
-	writerm.writerow([Frequency0, \
-                        0.5, \
-                        DetectionPulseLength, \
-                        DetectionPulsePower*4, \
-                        DetectionPulseType, \
-                        'Measure'])
 	#~ writerm.writerow([f4P1to3P2new, 0, 0.24,1.05, 2, '4,1 -> 3,2'])
 	#~ writerm.writerow([f3P2to4P3new, 0, 0.12,0.62, 2, '4,1 -> 3,2'])
 	#~ writerm.writerow([f4P3to3P3new, 0, 0.12,1.64, 2, '4,1 -> 3,2'])
@@ -1169,12 +1163,6 @@ for i in xrange(0,len(Phase)):
 			#~ 0, \
 			#~ 3, \
 			#~ 'Measure'])
-        writerm.writerow([Frequency0, \
-                        Phase[i], \
-                        DetectionPulseLength, \
-                        DetectionPulsePower, \
-                        DetectionPulseType, \
-                        'Measure'])
 	#~ writerm.writerow([f42to31new, -8e3, 3.0, P42to31new*64/36, 1, '4,-2 -> 3,1'])
 	#~ writerm.writerow([f4P1to3P2new, -8e3, 3.0, P4P1to3P2new*64/36, 1, '4,1 -> 3,2'])
 	#~ writerm.writerow([f3P2to4P3new, -8e3, 3.0, P3P2to4P3new*64/36, 1, '3,2 -> 4,3'])

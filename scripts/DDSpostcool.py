@@ -52,7 +52,7 @@ def check_pulse_files(names):
 		for b in bad[:20]:
 			print('  ' + b)
 		sys.exit(1)
-FilenameHead = 'Cool_Cal'   # filenames will start with this (can include directory, but use forward slash)
+FilenameHead = 'DDSpostcool'   # own name, not Cool_Cal's (review G2-7.1); filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
 print('Pulse file comment line: ' + FileComment.strip())
 

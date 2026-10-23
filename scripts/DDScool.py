@@ -52,7 +52,7 @@ def check_pulse_files(names):
 		for b in bad[:20]:
 			print('  ' + b)
 		sys.exit(1)
-FilenameHead = 'Cool_Cal'   # filenames will start with this (can include directory, but use forward slash)
+FilenameHead = 'DDScool'   # own name, not Cool_Cal's (review G2-7.1); filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
 print('Pulse file comment line: ' + FileComment.strip())
 
@@ -363,24 +363,27 @@ for i in xrange(0,10): # Typical cooling sequence (-2, -1)
 
 pulsefile.close() # Close the cooling pulse file
 
-rc = os.system('copy '+Coolfilename+' Cool')
+# Compiled under a private name (DDScool -> RAWDDScool), not Cool -> RAWCool: RAWCool in a data
+# folder is the cooling block every MW scan bat splices in, and this script used to overwrite
+# and then delete it (review G2-7.1).
+rc = os.system('copy '+Coolfilename+' DDScool')
 if rc != 0:
-	print('ERROR: copy %s -> Cool failed with exit %d. Aborting.' % (Coolfilename, rc))
+	print('ERROR: copy %s -> DDScool failed with exit %d. Aborting.' % (Coolfilename, rc))
 	sys.exit(1)
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
-check_pulse_files(['Cool'])
-rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'Cool'])
+check_pulse_files(['DDScool'])
+rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'DDScool'])
 if rc != 0:
-	print('ERROR: compile (NewDDS2-Cooling2.0-Cal.exe Cool) failed with exit %d. Aborting.' % rc)
+	print('ERROR: compile (NewDDS2-Cooling2.0-Cal.exe DDScool) failed with exit %d. Aborting.' % rc)
 	sys.exit(1)
 
-copyfile('RAWCool','C:/Users/Yang/Documents/Eclipse/CameraGUI/release/DDScool.txt')
-copyfile('RAWCool','C:/Users/Yang/Documents/Eclipse/CameraGUI/debug/DDScool.txt')
-copyfile('RAWCool','C:/Users/Yang/Documents/Eclipse/CameraGUI/DDScool.txt')
-os.system("del RAWCool")
+copyfile('RAWDDScool','C:/Users/Yang/Documents/Eclipse/CameraGUI/release/DDScool.txt')
+copyfile('RAWDDScool','C:/Users/Yang/Documents/Eclipse/CameraGUI/debug/DDScool.txt')
+copyfile('RAWDDScool','C:/Users/Yang/Documents/Eclipse/CameraGUI/DDScool.txt')
+os.system("del RAWDDScool")
 if DelTempFiles == 1 :
 	#~ os.system("del Cool List RAWCool reset")	
-	os.system("del "+Coolfilename+" Cool List reset")	
+	os.system("del "+Coolfilename+" DDScool List reset")	
 	
 
 	

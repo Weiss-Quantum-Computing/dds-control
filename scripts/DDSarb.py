@@ -46,7 +46,9 @@ f4new =58644387.8708 - 1.2e3 + 0.5e3 -8.2e3+7e3 -0.6e3+1.8e3 + 1.0e3-4e3 +0e3
 ##################################################
 
 def fitfunc(x,a,b,c,d,p1,p2,p3):
-	return a*np.cos(2*math.pi*x*0.060+p1)+b*np.cos(2*math.pi*0.120+p2)+c*np.cos(2*math.pi*x*0.18+p3)
+	# line-synchronous field model: 60, 120, 180 Hz harmonics (x in ms) plus an offset d. The 120 Hz
+	# term lacked x (a constant) and d was unused (review G2-7.2).
+	return a*np.cos(2*math.pi*x*0.060+p1)+b*np.cos(2*math.pi*x*0.120+p2)+c*np.cos(2*math.pi*x*0.18+p3)+d
 #~ y =[0,0.3, 1.9, 1.5, 1.5,1.7,1.2,1.6,1.4,0.9,-0.1,-0.5,-0.3,-0.5,-0.3,-0.1,0.1] # after 5pm
 #~ y = [0,0.7,1.3,2.1,2.6,2.8,2.4,3.2,2.8,3.1,1.2,1.2,0.3,0.4,-0.1,0.3,-0.2]	# before 5pm
 y = [0, 0.9, 1.8, 1.3, 2.2, 2.2, 2, 2.4, 2.1, 1.0, 0.6, -0.5, -0.1, -0.6, -0.5, -0.5, -0.5 ] # before 5pm 2017.10.17

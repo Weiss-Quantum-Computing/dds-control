@@ -22,7 +22,6 @@ import string      # string manipulation
 import random
 from shutil import copyfile
 import time
-from scipy.optimize import curve_fit
 
 
 DelTempFiles = 1 # Clean up after we're done?
@@ -73,7 +72,7 @@ def compile_raw(name):
 		sys.exit('ERROR: compiling %s failed (exit %d) or wrote no %s; nothing more is copied to CameraGUI.'
 			% (name, rc, raw))
 	return raw
-FilenameHead = 'Cool_Cal'   	 # filenames will start with this (can include directory, but use forward slash)
+FilenameHead = 'DDSarb'   # own name, not Cool_Cal's (unused here; review G2-8.3)
 FileComment  = 'Cool\n'  	 	 # Comment line at head of pulse files (must end with \n)
 print('Pulse file comment line: ' + FileComment.strip())
 
@@ -85,20 +84,8 @@ f4new =58644387.8708 - 1.2e3 + 0.5e3 -8.2e3+7e3 -0.6e3+1.8e3 + 1.0e3-4e3 +0e3
 ### CLOCK TRANSITION FREQ: 60.0068MHz ############
 ##################################################
 
-def fitfunc(x,a,b,c,d,p1,p2,p3):
-	# line-synchronous field model: 60, 120, 180 Hz harmonics (x in ms) plus an offset d. The 120 Hz
-	# term lacked x (a constant) and d was unused (review G2-7.2).
-	return a*np.cos(2*math.pi*x*0.060+p1)+b*np.cos(2*math.pi*x*0.120+p2)+c*np.cos(2*math.pi*x*0.18+p3)+d
-#~ y =[0,0.3, 1.9, 1.5, 1.5,1.7,1.2,1.6,1.4,0.9,-0.1,-0.5,-0.3,-0.5,-0.3,-0.1,0.1] # after 5pm
-#~ y = [0,0.7,1.3,2.1,2.6,2.8,2.4,3.2,2.8,3.1,1.2,1.2,0.3,0.4,-0.1,0.3,-0.2]	# before 5pm
-y = [0, 0.9, 1.8, 1.3, 2.2, 2.2, 2, 2.4, 2.1, 1.0, 0.6, -0.5, -0.1, -0.6, -0.5, -0.5, -0.5 ] # before 5pm 2017.10.17
-
-x =  np.linspace(0, 16, num=17, endpoint=True)
-popt, pcov = curve_fit(fitfunc, x, y)
-
-def frec(time):
-	print fitfunc(time-math.floor(time/16.67)*16.67,*popt)*1000
-	return fitfunc(time-math.floor(time/16.67)*16.67,*popt)*1000
+# (The line-synchronous field fit copied from Cool_Cal.py - fitfunc, the 2017 data, curve_fit,
+#  frec - was removed here: nothing in this script used it; review G2-8.3.)
 FrequencyStepSize =0.03e3 # Hz
 NumberOfRepeats   = 11# Number of times to repeat the scan
 

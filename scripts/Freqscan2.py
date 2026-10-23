@@ -817,5 +817,5 @@ print('Scan list %s: %d files x %d repeats = %d scans total' \
                     
 os.system('copy "%s" "%s.py"' % (sys.argv[0], FilenameHead)) # save a copy of this python file (quoted: paths may hold spaces)
 os.system("copy "+FilenameHead+".lst last.lst") # copy list file to last.lst
-print('Done. Script copied to %s.py; list file copied to last.lst.' % FilenameHead)
-os.system("copy "+FilenameHead+".scan last.scan") # copy scan file to last.lst
+os.system("copy "+FilenameHead+".scan last.scan") # copy scan file to last.scan
+print('Done. Script copied to %s.py; list/scan files copied to last.lst and last.scan.' % FilenameHead)

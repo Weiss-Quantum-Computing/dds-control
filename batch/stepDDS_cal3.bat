@@ -12,6 +12,10 @@ set CALEXE=%DDSDIR%\NewDDS2-Cooling2.0-Cal.exe
 if "%~1"=="" (echo Usage: stepDDS_cal3.bat List)&(exit /b 1)
 if /I "%~x1"==".lst" (echo ERROR: "%~1" is the experiment run list. Pass the compile list "List".)&(exit /b 1)
 if not exist "%~1" (echo ERROR: compile list "%~1" not found.)&(exit /b 1)
+rem In DDScontrol itself the copy below would be onto the master reset, and the script's
+rem clean-up would then delete the only copy (review G2-2.1).
+for %%d in ("%DDSDIR%") do set DDSFULL=%%~fd
+if /I "%CD%"=="%DDSFULL%" (echo ERROR: run from a data folder below DDScontrol, not in DDScontrol itself.)&(exit /b 1)
 copy "%DDSDIR%\reset" reset
 if not exist reset (echo ERROR: no reset preamble here - nothing assembled.)&(exit /b 1)
 if not exist RAWGate (echo ERROR: RAWGate missing - the script must compile Gate first. Nothing assembled.)&(exit /b 1)

@@ -10,6 +10,10 @@ set CALEXE=%DDSDIR%\NewDDS2-Cooling2.0-Cal-V2.exe
 if "%~1"=="" (echo Usage: stepDDS_coolscan.bat List)&(echo   Pass the compile list "List" written by Coolscan.py, NOT the .lst run list)&(exit /b 1)
 if /I "%~x1"==".lst" (echo ERROR: "%~1" is the experiment run list. Pass the compile list "List" written by Coolscan.py.)&(exit /b 1)
 if not exist "%~1" (echo ERROR: compile list "%~1" not found.)&(exit /b 1)
+rem In DDScontrol itself the copy below would be onto the master reset, and the script's
+rem clean-up would then delete the only copy (review G2-2.1).
+for %%d in ("%DDSDIR%") do set DDSFULL=%%~fd
+if /I "%CD%"=="%DDSFULL%" (echo ERROR: run from a data folder below DDScontrol, not in DDScontrol itself.)&(exit /b 1)
 copy "%DDSDIR%\reset" reset
 if not exist reset (echo ERROR: no reset preamble here - nothing assembled.)&(exit /b 1)
 rem (goto, not exit /b, inside the loop: an exit /b followed by more commands in a

@@ -15,6 +15,10 @@ DelTempFiles = 1 # Clean up after we're done?
 
 # define some constants
 DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit for another install
+# Refuse to run in DDScontrol itself: the clean-up at the end deletes 'reset', which there
+# is the master copy that every bat splices into the final files (review G2-2.1).
+if os.path.normcase(os.path.abspath(os.getcwd())) == os.path.normcase(DDSDIR):
+	sys.exit('ERROR: run this script from a data folder below DDScontrol, not in ' + DDSDIR)
 FilenameHead = 'Phasescan-RF'   # filenames will start with this (can include directory, but use forward slash)
 FileComment = 'Cool\n'  # Comment line at head of pulse files (must end with \n)
 print('Pulse file comment line: ' + FileComment.strip())

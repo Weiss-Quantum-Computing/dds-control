@@ -215,13 +215,21 @@ for i in xrange(0,NumberOfFiles):
 
     pulsefile.close() # Close the pulse file
 
-    # Meas log: filename, the scanned sideband(s), and the detection row
+    # Meas log: filename, the scanned sideband(s), and the detection row. The sideband rows are
+    # real pulse rows (HSR and power as played in the first cooling loop; the -1 pulses use
+    # AFPHSR2 in the second loop); the scan offset goes in the comment, not in the HSR column
+    # where it used to be (review G2-7.3).
     writerm.writerow([Filenames[i]])
     if ScanMode == 'axis':
-        writerm.writerow([Freqs['M1'+ScanAxis], ScanOffsets[i], AFPLength, AFPPower0, 1, 'M1'+ScanAxis+' scanned'])
-        writerm.writerow([Freqs['M2'+ScanAxis], 2.0*ScanOffsets[i], AFPLength, AFPPower1, 1, 'M2'+ScanAxis+' scanned'])
+        writerm.writerow([Freqs['M1'+ScanAxis], AFPHSR0, AFPLength, AFPPower0, 1,
+                          'M1'+ScanAxis+' scanned, offset %r Hz' % ScanOffsets[i]])
+        writerm.writerow([Freqs['M2'+ScanAxis], AFPHSR1, AFPLength, AFPPower1, 1,
+                          'M2'+ScanAxis+' scanned, offset %r Hz' % (2.0*ScanOffsets[i])])
     else:
-        writerm.writerow([ScannedFreq, ScanOffsets[i], AFPLength, AFPPower0, 1, ScanSideband+' scanned'])
+        _m2 = ScanSideband.startswith('M2')
+        writerm.writerow([ScannedFreq, AFPHSR1 if _m2 else AFPHSR0, AFPLength,
+                          AFPPower1 if _m2 else AFPPower0, 1,
+                          ScanSideband+' scanned, offset %r Hz' % ScanOffsets[i]])
     writerm.writerow([DetectionFrequency, DetectionPulseHSR, DetectionPulseLength, \
                       DetectionPulsePower, DetectionPulseType, 'Measure'])
 

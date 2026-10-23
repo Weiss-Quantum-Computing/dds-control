@@ -372,7 +372,7 @@ FreqM2Z = fc+ 25e3   #28.4e3-2e3  #19.1e3 # Hz, -2 sideband
 
 # calculate some stuff
 Power = np.arange(StartingPower, StoppingPower+PowerStepSize/2.0, \
-                      PowerStepSize) # in Hz
+                      PowerStepSize) # in W
 
 NumberOfFiles = len(Power)
 

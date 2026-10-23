@@ -440,7 +440,7 @@ FreqM1Z = fc+ 12e3   #	12.4e3-2e3  #8.5e3 # Hz, -1 sideband
 FreqM2Z = fc+ 25e3   #28.4e3-2e3  #19.1e3 # Hz, -2 sideband
 
 # calculate some stuff
-Power = np.arange(StartingPower, StoppingPower+PowerStepSize/2.0, PowerStepSize) # in Hz
+Power = np.arange(StartingPower, StoppingPower+PowerStepSize/2.0, PowerStepSize) # in W
 
 NumberOfFiles = len(Power)
 
@@ -529,9 +529,9 @@ if rc != 0:
 	print('ERROR: copy %s -> Gate failed with exit %d. Aborting.' % (Coolfilename, rc))
 	sys.exit(1)
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
-rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'Gate'])
+rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal-V2.exe'), 'Gate'])  # Cal-V2, as the other scans (G2-5.3)
 if rc != 0:
-	print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal.exe) failed with exit %d. Aborting.' % rc)
+	print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal-V2.exe) failed with exit %d. Aborting.' % rc)
 	sys.exit(1)
 print('Cooling pulse file compiled successfully (Gate).')
 
@@ -655,7 +655,7 @@ scanfile.close()
 
 
 #print('Current directory: '+os.getcwd())
-print('Compiling %d pulse files (stepDDS_cal3.bat)...' % NumberOfFiles)
+print('Compiling %d pulse files (stepDDS_cal3-V2.bat)...' % NumberOfFiles)
 # Record the cooling state of this data set: the bat splices whatever RAWCool sits in this
 # folder, and deleting RAWCool is the cooling-off switch (review G2-2.3). Kept out of the
 # -Meas file so it stays byte-comparable with ddsgui's.
@@ -671,9 +671,9 @@ _coolfile = open(FilenameHead + '-RAWCool.txt', 'wb')
 _coolfile.write(_coolstate + '\r\n')
 _coolfile.close()
 check_pulse_files(Filenames + [Coolfilename])
-rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3.bat'), 'List'])
+rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3-V2.bat'), 'List'])
 if rc != 0:
-	print('ERROR: stepDDS_cal3.bat failed with exit %d. Aborting.' % rc)
+	print('ERROR: stepDDS_cal3-V2.bat failed with exit %d. Aborting.' % rc)
 	sys.exit(1)
 #print('After batch file')
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_copy.bat List")

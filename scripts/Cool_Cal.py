@@ -441,9 +441,9 @@ if rc != 0:
 	sys.exit(1)
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
 check_pulse_files(['Cool'])
-rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'Cool'])
+rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal-V2.exe'), 'Cool'])  # Cal-V2, as the scans (G2-7.4)
 if rc != 0:
-	print('ERROR: compile (NewDDS2-Cooling2.0-Cal.exe Cool) failed with exit %d. Aborting.' % rc)
+	print('ERROR: compile (NewDDS2-Cooling2.0-Cal-V2.exe Cool) failed with exit %d. Aborting.' % rc)
 	sys.exit(1)
 #~ os.system('copy RAWCool C:\Users\Yang\Documents\Eclipse\CameraGUI\release\DDScool.txt')
 #~ os.system('copy RAWCool C:\Users\Yang\Documents\Eclipse\CameraGUI\DDScool.txt')

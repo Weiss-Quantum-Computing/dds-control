@@ -697,9 +697,9 @@ if rc != 0:
         print('ERROR: copy %s -> Gate failed with exit %d. Aborting.' % (Coolfilename, rc))
         sys.exit(1)
 #os.system('C:\Users\Yang\Documents\Data\DDScontrol\NewDDS2-Cooling2.0-Cal.exe Cool')
-rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal.exe'), 'Gate'])
+rc = subprocess.call([os.path.join(DDSDIR, 'NewDDS2-Cooling2.0-Cal-V2.exe'), 'Gate'])  # Cal-V2 knows types 12-17 (G2-4.3)
 if rc != 0:
-        print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal.exe) failed with exit %d. Aborting.' % rc)
+        print('ERROR: Gate compile (NewDDS2-Cooling2.0-Cal-V2.exe) failed with exit %d. Aborting.' % rc)
         sys.exit(1)
 print('Cooling pulse file compiled successfully (Gate).')
 
@@ -1261,7 +1261,7 @@ scanfile.write(str(NumberOfRepeats)+'\n')
 scanfile.close()
 
 #print('Current directory: '+os.getcwd())
-print('Compiling %d pulse files (stepDDS_cal3.bat)...' % NumberOfFiles)
+print('Compiling %d pulse files (stepDDS_cal3-V2.bat)...' % NumberOfFiles)
 # Record the cooling state of this data set: the bat splices whatever RAWCool sits in this
 # folder, and deleting RAWCool is the cooling-off switch (review G2-2.3). Kept out of the
 # -Meas file so it stays byte-comparable with ddsgui's.
@@ -1277,9 +1277,9 @@ _coolfile = open(FilenameHead + '-RAWCool.txt', 'wb')
 _coolfile.write(_coolstate + '\r\n')
 _coolfile.close()
 check_pulse_files(Filenames + [Coolfilename])
-rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3.bat'), 'List'])
+rc = subprocess.call([os.path.join(DDSDIR, 'stepDDS_cal3-V2.bat'), 'List'])
 if rc != 0:
-        print('ERROR: stepDDS_cal3.bat failed with exit %d. Aborting.' % rc)
+        print('ERROR: stepDDS_cal3-V2.bat failed with exit %d. Aborting.' % rc)
         sys.exit(1)
 #print('After batch file')
 #os.system("C:\Users\Yang\Documents\Eclipse\NewDDS2-Cooling2.0\pulsefiles\stepDDS_copy.bat List")

@@ -18,6 +18,15 @@ DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit f
 # is the master copy that every bat splices into the final files (review G2-2.1).
 if os.path.normcase(os.path.abspath(os.getcwd())) == os.path.normcase(DDSDIR):
 	sys.exit('ERROR: run this script from a data folder below DDScontrol, not in ' + DDSDIR)
+# RETIRED (review G2-6.1, Oct 2026). This file is Rabi.py with the RF bat: its scan frequency
+# is f4new, the ~58.66 MHz microwave DDS frequency, while the RF chain runs at ~0.27-0.29 MHz
+# (Freqscan-RF / Powerscan-RF / Phasescan-RF solve fRF from the Breit-Rabi block). As committed
+# it would send RF pulses far off resonance, at a frequency the RF coil/amplifier is not meant
+# for. Use ddsgui's Power Scan with RF on and quadratic (amp) steps, or Powerscan-RF.py.
+# Kept for reference: remove the sys.exit below only after porting fRF (Breit-Rabi block,
+# rf_Power_Calib) and RF pulse lengths/powers from Powerscan-RF.py.
+sys.exit('Rabi-RF.py is retired: it would drive the RF channel at the microwave frequency f4new '
+	'(~58.66 MHz). Use ddsgui Power Scan (RF, quadratic steps) or Powerscan-RF.py instead.')
 FilenameHead = 'Rabi-RF'   # filenames will start with this (can include directory, but use forward slash)
 FileComment = 'CoolTransfer\n'  # Comment line at head of pulse files (must end with \n)
 print('Pulse file comment line: ' + FileComment.strip())

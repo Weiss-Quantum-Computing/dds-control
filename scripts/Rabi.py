@@ -18,6 +18,15 @@ DDSDIR = r'C:\Users\Yang\Documents\Data\DDScontrol'  # lab-specific path; edit f
 # is the master copy that every bat splices into the final files (review G2-2.1).
 if os.path.normcase(os.path.abspath(os.getcwd())) == os.path.normcase(DDSDIR):
 	sys.exit('ERROR: run this script from a data folder below DDScontrol, not in ' + DDSDIR)
+# RETIRED (review G2-6.2, Oct 2026; Maarten 24 Oct: retire it like Rabi-RF.py). Its scan
+# frequency is f4new, a hand-tuned 2018 value (58.664 MHz) with no Breit-Rabi B solve, while
+# today's Freqscan.py runs at a different bias field (~56.6 MHz); it cannot follow a new f4new
+# without editing about 20 lines. Freq-Scan-GUI (ddsgui) replaces it: Power Scan with
+# 'Quadratic (amp) steps' on reproduces this power sweep (linear in sqrt(P)) at the current
+# transition frequency. Kept for reference: remove the sys.exit below only after porting the
+# Breit-Rabi block from Powerscan.py and re-checking the 2018 transition ladder.
+sys.exit('Rabi.py is retired: its microwave frequency f4new is a 2018 value (58.664 MHz) with no '
+	'B-field solve. Use Freq-Scan-GUI (ddsgui) Power Scan with quadratic (amp) steps instead.')
 # Refuse rows the compilers would turn into garbage before anything is compiled (review
 # G2-2.4): the same limits as ddsgui (config.POWMAX_W) and the rebuilt Cal/Cal-V2 compilers.
 POWMAX_W = 5.188  # W, top of the compilers' power calibration table (Pow2AmpWord)

@@ -1,5 +1,26 @@
 # DDS Control
 
+> **Status (2026-11-02): the scan scripts and the batch files are deprecated.**
+> The lab now runs its DDS scans from the DDS control GUI
+> ([Freq-Scan-GUI](https://github.com/Weiss-Quantum-Computing/Freq-Scan-GUI)),
+> which writes, compiles, assembles and plays the pulse files itself. Those
+> parts get no further updates here; make changes in the GUI instead.
+>
+> | Part | Status |
+> |---|---|
+> | `scripts/` Freqscan, Freqscan2, Freqscan-RF, Powerscan, Powerscan-RF, Phasescan, Phasescan-RF, Rabi, Rabi-RF, Coolscan, Cool_Cal | **deprecated** - replaced by the GUI's Freq / Power / Phase / Cooling scan panels |
+> | `batch/*.bat` (stepDDS*, repeatDDS) | **deprecated** - the GUI assembles the final files and plays the run list itself |
+> | `scripts/legacy/`, `firmware/legacy/` | reference only (unchanged) |
+> | `firmware/NewDDS2-Cooling2.0-Cal-V2` (the pulse compiler) and `firmware/NewDDS2-Cooling2.0` / `-RF` (the run programs) | **still used** - the GUI runs these three exes; compiler fixes still belong here |
+> | `firmware/NewDDS2-Cooling2.0-Cal` | **still used** by the scripts below |
+> | `batch/reset` (the 16-word DDS reset preamble) | **still used** - the GUI starts every final file with it |
+> | `scripts/` DDSaddress, DDSarb, DDScool, DDSpostcool, `scripts/hardware/AddressingSearch.py` | **still used** - they make the DDSaddress.txt / DDSarb.txt / DDSarbPartition.txt / DDScool*.txt pulse files CameraGui's addressing, arbitrary-pulse and cooling modes read; the GUI has no replacement for them yet |
+>
+> Every fix of the deprecated scripts that the GUI needs is in the GUI (audited
+> 2026-11-02, the last one being the RF power flattening of `rf_Power_Calib`).
+> `Daily2.py` (Daily-file-creation) no longer seeds the day folders with the
+> scripts unless `SeedDDSScripts = 1`.
+
 Control software for a homemade Direct Digital Synthesis (DDS) source that
 drives the microwave and RF pulse sequences of a cesium-133 atomic-physics
 experiment (laser-cooled atoms in an optical lattice, hyperfine-manifold

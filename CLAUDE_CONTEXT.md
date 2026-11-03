@@ -7,6 +7,16 @@ quirks that aren't obvious from reading the code cold.
 
 Repo: https://github.com/Weiss-Quantum-Computing/dds-control (public)
 
+**Deprecated parts (2026-11-02) - do not update them.** The scan scripts the DDS
+control GUI (Freq-Scan-GUI) replaces (Freqscan, Freqscan2, Freqscan-RF, Powerscan,
+Powerscan-RF, Phasescan, Phasescan-RF, Rabi, Rabi-RF, Coolscan, Cool_Cal) and every
+`batch/*.bat` are deprecated: the lab runs those scans from the GUI, so a change
+to that behaviour goes into Freq-Scan-GUI. Still maintained here: `firmware/`
+(the GUI runs the Cal-V2 compiler and the two run programs; the scripts below use
+the Cal compiler), `batch/reset`, and DDSaddress / DDSarb / DDScool / DDSpostcool /
+`scripts/hardware/AddressingSearch.py` (CameraGui's addressing, arbitrary-pulse and
+cooling modes read their output files). The README's status table is the list.
+
 ## What this is
 
 Control software for a homemade DDS (Direct Digital Synthesis) source

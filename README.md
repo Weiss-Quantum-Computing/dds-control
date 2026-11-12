@@ -80,8 +80,18 @@ scripts/                        Python pulse-sequence generators
   hardware/                     picomotor / serial-port helpers (ldcnlib, etc.)
   legacy/                       older cooling_control.py generation
 batch/                          Windows orchestration (.bat) + binary reset preamble
-docs/                           programming guide, manual, setup drawing
+docs/                           programming guide, manual, setup drawing, LO synthesizer docs
 ```
+
+`docs/uWaveSetup.png` is the original microwave chain. It shows an MVSR-9316 LO at
+9.142625 GHz; the current LO is a Micro Lambda MLVS-2009AS (base model MLVS-0520AS)
+at 9.1326249676 GHz (`FMIX`). The MLVS documents are:
+
+- `MLVS-2009AS_spec.pdf` - the as-ordered spec sheet. External 10 MHz reference
+  input level is 0 dBm ±6 dB (50 Ω), and RF output is +15 dBm minimum (not levelled).
+- `MLVS-0520_datasheet.pdf` - the base-model datasheet (phase noise, options).
+- `MLVS_outline_99-0101-001H.pdf` - outline drawing and pinout. J4 is REF OUT, J5 is
+  REF IN, J6 is RF OUT; J1 pins 6 and 13 are the REF LOCK and RF LOCK status lines.
 
 ## Prerequisites
 

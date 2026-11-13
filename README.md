@@ -93,6 +93,17 @@ at 9.1326249676 GHz (`FMIX`). The MLVS documents are:
 - `MLVS_outline_99-0101-001H.pdf` - outline drawing and pinout. J4 is REF OUT, J5 is
   REF IN, J6 is RF OUT; J1 pins 6 and 13 are the REF LOCK and RF LOCK status lines.
 
+`docs/uWaveChain_2026-11-13.svg` is the microwave chain as built on 13 Nov 2026, the
+current reference in place of `uWaveSetup.png`. It shows the power (dBm and Vpp) at
+every point for the uW DDS at full scale (5.187) and for the BK 4063B AWG at 5 Vpp,
+with each part's damage limit or 1 dB compression point. The AWG path is: BLK-89-S+
+DC block, 29 dB pad, ZYSWA-2-50DR gated by Supertime, ZSWA-4-30DR held off while the
+uW DDS self-timing is high, then ZX60-P103LN+, into the coupled port of a reversed
+10 dB directional coupler ahead of the monitor coupler. Values marked "meas." are scope readings from that day; DDS and
+AWG agree at the monitor (200-205 mVpp) and after the BLP-90 (+9.5 dBm, 1.88-1.91 Vpp).
+From the SSB70100A mixer onward the levels are estimates, and the AM53 amplifier's
+compression is still to be checked with the atoms.
+
 ## Prerequisites
 
 - **NI-DAQmx** (ANSI C Dev) — `NIDAQmx.h` / `NIDAQmx.lib`, from National

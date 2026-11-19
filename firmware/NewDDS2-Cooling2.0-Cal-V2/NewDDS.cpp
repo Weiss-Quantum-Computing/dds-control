@@ -63,8 +63,8 @@ static const char * BadPulseRow(const int type, const double length, const doubl
 	}
     if (!(power >= 0.0)) // also NaN
 	return "power is negative";
-    if (power > (double) POWMAX)
-	return "power is above POWMAX, the top of the power calibration table";
+    if (power > AmpTableTop()) // POWMAX with the built-in table, the last point of a table file
+	return "power is above the top of the power calibration table";
     // Lengths: a negative one wraps in Time2Tics, and the classes below allocate
     // Time2Tics(k*length) tics and then write tic 0, i.e. into a zero-length array
     // when the pulse is too short (review G2-11.5; a zero-length AFP crashed the compiler).
@@ -117,11 +117,11 @@ int main(int argc, char* argv[])
 //	    cout << "No input file specified.  Using default: " << DEFAULTFILENAME << endl;
 	    filename = DEFAULTFILENAME;
 	}
-    else if (argc>2)
+    else if (argc>3)
 	{
 	    cout << "Too many command line parameters." << endl;
 	    cout << "Correct syntax: ";
-	    cout << argv[0] << "filename" << endl;
+	    cout << argv[0] << " filename [amplitude table file]" << endl;
 	    return -1;
 	}
     else // argc must be correct!
@@ -133,6 +133,20 @@ int main(int argc, char* argv[])
     // cannot leave a stale one for the bats / scripts to splice.
     remove(("RAW" + filename).c_str());
 
+    // 2026-11: an optional second argument names an amplitude table file (conversions.cpp, LoadAmpTable).
+    // Without it the built-in 2015 table is used and every word is as before. A file that cannot be
+    // read as a table refuses the compile: it is never replaced by the built-in table in silence.
+    if (argc == 3)
+	{
+	string why;
+	if (LoadAmpTable(argv[2], why) < 0)
+	    {
+	    cout << "ERROR: amplitude table " << argv[2] << ": " << why << endl;
+	    cout << "Refusing " << filename << ": nothing compiled, no RAW file written." << endl;
+	    return (REFUSED);
+	    }
+	}
+    cout << AmpTableDescription() << endl;
 
     unsigned int totalnum ; // count number of pulses
     Pulse pulse; // main pulse (formerly called "test")

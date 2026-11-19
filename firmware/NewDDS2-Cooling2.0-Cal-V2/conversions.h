@@ -36,6 +36,12 @@ double Volts2Pow(double volts);
 
 unsigned int Pow2AmpWord(double pow); //convert power in watts to 12-bit Amplitude Word (remember amp ~ pow^0.5)
 
+// 2026-11: an amplitude table read from a file (the compiler's optional second argument) takes the place of the
+// built-in 2015 table in Pow2AmpWord. Without one nothing changes.
+int LoadAmpTable(const char * path, std::string & message); // 1 = loaded and in use; -1 = refused, message says why
+double AmpTableTop(); // highest power (W) the conversion in use accepts
+std::string AmpTableDescription(); // one line for the console: which conversion is in use
+
 //double AmpWord2Pow(unsigned int amp); // Convert amplitude word to power in Watts (remember pow ~ amp^2)
 
 unsigned long Time2Tics(double seconds);

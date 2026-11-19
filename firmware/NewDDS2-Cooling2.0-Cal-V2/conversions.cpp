@@ -8,6 +8,9 @@
 // unit and format conversions for the NewDDS code
 // Define some utility functions (mostly conversions)
 #include <string>
+#include <fstream>
+#include <sstream>
+#include <stdlib.h>
 #include "DDSconstants.h"
 #include "conversions.h"
 #include<math.h>
@@ -38,7 +41,11 @@ long double FreqWord2Hz(uint64_t f) // convert frequency word to Hz
 
 uint64_t RR2Word(long double tic) // Convert Hz to 40-bit frequency word (WARNING: rounding error)
     {
-    return ((uint64_t) floor(tic * INTCLOCK - 1));
+    // 2026-11: + 1e-6 before the floor. tic * INTCLOCK is a whole number (300 for the AFP ramp clock) that
+    // comes out a hair above or below it depending on the compiler's floating point: the lab's MinGW exe
+    // writes 299 (register 0x1c = 0x2b), a 64-bit build of the same source 298. With the margin every
+    // build writes what the lab's exe always has.
+    return ((uint64_t) floor(tic * INTCLOCK - 1 + 1e-6L));
     }
 
 uint64_t Hz2FreqWord(long double fhz) // Convert Hz to 40-bit frequency word (WARNING: rounding error)
@@ -109,9 +116,195 @@ double Volts2Pow(double volts)
     return ((double) amp / 4095.0 * VOLTMAX);
     }*/
 
+// ---- amplitude table from a file (2026-11) -------------------------------------------------
+// The built-in conversion below (2015) tabulates the amplitude fraction against the POWER and joins
+// the points with cubic pieces, starting at (0 W, 0). Below its first point, 16.2 mW, the amplitude
+// comes out nearly proportional to the power, where a linear chain needs sqrt(power): a pulse typed
+// at 3 mW got word 40 where the square-root law gives 88, and every shaped pulse passes through
+// that region in its wings. The pieces do not join smoothly either (the slope doubles at 66 mW),
+// and the word was rounded down.
+// A table file replaces all of that, and can be remeasured without rebuilding this program:
+//
+//     # anything after a '#' is a comment
+//     version 1
+//     interpolation sqrt-linear
+//     rounding nearest
+//     0          0
+//     0.0162181  0.05
+//     ...                        power in W, amplitude fraction (word / 4095)
+//     5.188      1
+//
+// The three keyword lines are required, each once, with exactly these values (they say what this
+// program does with the numbers; another value is refused, not guessed at). The points: the first
+// is 0 0, powers and fractions both strictly rising, fractions at most 1, 2 to 500 points.
+// The conversion: fraction = straight lines between the points against sqrt(power), so a chain
+// that is linear in the word needs nothing more than its two end points; word = 4095 x fraction
+// rounded to the nearest. 0 W (or less, or NaN) is word 0; the top power or more is the top word.
+// ddsgui/ampword.py of Freq-Scan-GUI is the same conversion in Python, compared word for word.
+const int AMPTABLEMAX = 500;
+static int ampTableN = 0; // points in use; 0 = the built-in table
+static double ampTableU[AMPTABLEMAX]; // sqrt(power in W)
+static double ampTableY[AMPTABLEMAX]; // amplitude fraction
+static double ampTableTopW = 0; // the last point's power
+static string ampTableName = "";
+
+static bool AmpNumber(const string & token, double & value) // the whole token is one finite number
+    {
+    char * end = 0;
+    value = strtod(token.c_str(), &end);
+    return (token.size() > 0 && *end == 0 && value == value && value - value == 0);
+    }
+
+int LoadAmpTable(const char * path, string & message)
+    {
+    ampTableN = 0;
+    ifstream file(path);
+    if (!file.is_open())
+	{
+	message = "cannot open the file";
+	return -1;
+	}
+    static double power[AMPTABLEMAX], fraction[AMPTABLEMAX];
+    int points = 0, version = 0, interpolation = 0, rounding = 0;
+    string line;
+    unsigned int number = 0;
+    ostringstream why;
+    while (getline(file, line))
+	{
+	number++;
+	string::size_type hash = line.find('#');
+	if (hash != string::npos)
+	    line.erase(hash);
+	istringstream words(line);
+	string first, second, third;
+	if (!(words >> first))
+	    continue; // blank or comment
+	if (!(words >> second) || (words >> third))
+	    {
+	    why << "line " << number << ": expected two items (a keyword and its value, or a power and a fraction)";
+	    message = why.str();
+	    return -1;
+	    }
+	if (first == "version" || first == "interpolation" || first == "rounding")
+	    {
+	    int & seen = (first == "version") ? version : (first == "interpolation") ? interpolation : rounding;
+	    const char * wanted = (first == "version") ? "1" : (first == "interpolation") ? "sqrt-linear" : "nearest";
+	    if (seen)
+		{
+		why << "line " << number << ": '" << first << "' is given twice";
+		message = why.str();
+		return -1;
+		}
+	    if (second != wanted)
+		{
+		why << "line " << number << ": '" << first << " " << second << "' is not known to this program (it knows '"
+		    << first << " " << wanted << "')";
+		message = why.str();
+		return -1;
+		}
+	    seen = 1;
+	    continue;
+	    }
+	double p, f;
+	if (!AmpNumber(first, p) || !AmpNumber(second, f))
+	    {
+	    why << "line " << number << ": '" << first << " " << second << "' is not a power and a fraction";
+	    message = why.str();
+	    return -1;
+	    }
+	if (points >= AMPTABLEMAX)
+	    {
+	    why << "more than " << AMPTABLEMAX << " points";
+	    message = why.str();
+	    return -1;
+	    }
+	if (points == 0 && !(p == 0 && f == 0))
+	    {
+	    why << "line " << number << ": the first point must be 0 0";
+	    message = why.str();
+	    return -1;
+	    }
+	if (points > 0 && !(p > power[points-1] && f > fraction[points-1]))
+	    {
+	    why << "line " << number << ": powers and fractions must both rise from point to point";
+	    message = why.str();
+	    return -1;
+	    }
+	if (!(f <= 1))
+	    {
+	    why << "line " << number << ": the fraction is above 1";
+	    message = why.str();
+	    return -1;
+	    }
+	power[points] = p;
+	fraction[points] = f;
+	points++;
+	}
+    if (!version || !interpolation || !rounding)
+	{
+	message = string("the line '") + (!version ? "version 1" : !interpolation ? "interpolation sqrt-linear" : "rounding nearest")
+		+ "' is missing";
+	return -1;
+	}
+    if (points < 2)
+	{
+	message = "fewer than 2 points";
+	return -1;
+	}
+    for (int i = 0; i < points; i++)
+	{
+	ampTableU[i] = sqrt(power[i]);
+	ampTableY[i] = fraction[i];
+	}
+    ampTableTopW = power[points-1];
+    ampTableName = path;
+    ampTableN = points;
+    return 1;
+    }
+
+double AmpTableTop()
+    {
+    return (ampTableN > 0 ? ampTableTopW : (double) POWMAX);
+    }
+
+string AmpTableDescription()
+    {
+    ostringstream text;
+    if (ampTableN > 0)
+	text << "Amplitude conversion: table file " << ampTableName << " (" << ampTableN
+	     << " points, 0 to " << ampTableTopW << " W; straight lines against sqrt(power), nearest word)";
+    else
+	text << "Amplitude conversion: built-in 2015 table (cubic pieces against power, word rounded down)";
+    return text.str();
+    }
+
+static unsigned int AmpWordFromTable(double power) // the table file's conversion
+    {
+    if (!(power > 0)) // also NaN
+	return (0);
+    volatile double u = sqrt(power); // volatile: a plain double, whatever the FPU's own precision
+    int jl = 0, ju = ampTableN - 1;
+    if (u >= ampTableU[ju])
+	return ((unsigned int) floor(4095.0 * ampTableY[ju] + 0.5));
+    while (ju - jl > 1)
+	{
+	int jm = (ju + jl) >> 1;
+	if (u >= ampTableU[jm])
+	    jl = jm;
+	else
+	    ju = jm;
+	}
+    volatile double t = (u - ampTableU[jl]) / (ampTableU[ju] - ampTableU[jl]);
+    volatile double y = ampTableY[jl] + (ampTableY[ju] - ampTableY[jl]) * t;
+    volatile double w = 4095.0 * y + 0.5;
+    return ((unsigned int) floor(w));
+    }
+
 unsigned int Pow2AmpWord(double pow) //convert power in watts to 12-bit Amplitude Word (remember amp ~ pow^0.5)
 
     {  /* Using calibration data of 20100914 */
+    if (ampTableN > 0) // 2026-11: a table file is in use (LoadAmpTable); else the built-in table below, as before
+	return (AmpWordFromTable(pow));
 /*
 	double x;
 	unsigned int amp;
@@ -297,7 +490,12 @@ unsigned int Pow2AmpWord(double pow) //convert power in watts to 12-bit Amplitud
 
 unsigned long Time2Tics(double seconds)
     {
-    return ((unsigned long) floor(seconds * FIFOCLOCK / 8.0)); //8 is the maximum number of registers need to be changed
+    // 2026-11: + 1e-6 tic before the floor. A length typed on the pulse's own grid (7 us for a square pulse,
+    // 0.504 ms for an AFP) reaches here as a double a hair BELOW the whole number of tics about one time in
+    // three, and the bare floor then played one step less than typed: 6 us for 7, 62 AFP tics for 63, and a
+    // 2 us Blackman was refused as 'below 2 us'. The lengths the lab's sequences use (0.12, 0.2, 0.36, 0.68,
+    // 0.71, 0.96, 2.88, 3, 10 ms) were not among them. A length between grid points is floored as before.
+    return ((unsigned long) floor(seconds * FIFOCLOCK / 8.0 + 1e-6)); //8 is the maximum number of registers need to be changed
     }
 
 double Tics2Time(unsigned long tics)

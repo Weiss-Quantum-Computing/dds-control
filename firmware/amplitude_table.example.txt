@@ -1,0 +1,41 @@
+# Amplitude table for NewDDS2-Cooling2.0-Cal-V2 (the compiler's optional second argument) and Freq-Scan-GUI.
+#
+# EXAMPLE, not a calibration: these are the 21 points of the compiler's built-in 2015 table, unchanged.
+# Used as a table file they are read differently from the built-in table: straight lines against
+# sqrt(power) and the word rounded to the nearest, where the built-in conversion draws cubic pieces
+# against the power from (0 W, 0) and rounds down. So with this file
+#   - below the first point (16.2 mW) the amplitude follows sqrt(power): a pulse typed at 3 mW gets
+#     word 89 where the built-in conversion gives 40;
+#   - a 0.12 ms Blackman pi pulse at 0.4 W gains about 3 % of area, so every pi power must be
+#     measured again before sequences calibrated with the built-in conversion are used with it.
+# A measured table (power in W at the atoms' frequency against the DDS word / 4095) replaces the
+# points below; add points below 16 mW, where the 2015 table has none.
+#
+# Format: the three keyword lines are required as they are. Then the points, power in W and
+# amplitude fraction (word / 4095): the first is 0 0, both columns rise, the fraction is at most 1.
+version 1
+interpolation sqrt-linear
+rounding nearest
+
+# power (W)       fraction
+0                 0
+0.01621810097     0.05
+0.0660693448      0.1
+0.1496235656      0.15
+0.2754228703      0.2
+0.413047502       0.25
+0.6165950019      0.3
+0.8109610579      0.35
+1.083926914       0.4
+1.327394458       0.45
+1.678804018       0.5
+1.972422736       0.55
+2.398832919       0.6
+2.691534804       0.65
+3.16227766        0.7
+3.531831698       0.75
+4.120975191       0.8
+4.415704474       0.85
+4.841723676       0.9
+4.988844875       0.95
+5.188000389       1

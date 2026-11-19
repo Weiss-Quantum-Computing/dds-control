@@ -1,0 +1,21 @@
+# Amplitude table for the RF chain - EXAMPLE, not a calibration.
+#
+# The RF DDS is compiled by the same program as the microwave DDS, so without a file of its own it gets
+# the microwave chain's built-in 2015 table: a typed RF power becomes the word that would give that power
+# out of the MICROWAVE amplifier, compression correction included. The RF 'watts' are then only labels, and
+# the RF amplitude is not proportional to sqrt(typed power): against a square-root law through the word at
+# 1 W the built-in table is 2 % high at 4 W, 6 % high at 4.8 W, 14 % high at its top and 18 % low at 10 mW.
+#
+# This file is the simplest table for a chain that is LINEAR in the word: amplitude proportional to
+# sqrt(power), with the same word at 1 W as the built-in table gives (1577), so a pulse calibrated near 1 W
+# changes least. Two points are all a linear chain needs. Whether the RF chain is linear has to be measured
+# (the D1 - D3 bench sequences, an oscilloscope on the RF drive); a chain that is not gets more points.
+# Typed powers above the last point are refused: the top here is 6.7429 W, where the built-in table went to 5.188.
+# Using a table changes every RF pulse's area: measure the RF pi power again when it goes in.
+version 1
+interpolation sqrt-linear
+rounding nearest
+
+# power (W)       fraction
+0                 0
+6.742864392       1

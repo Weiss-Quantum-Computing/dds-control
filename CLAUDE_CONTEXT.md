@@ -74,6 +74,34 @@ the Mac-side source but may not yet be present in whatever `.cpp` a lab
 PC last built from** — check `grep -c 'Reading pulse.*num' NewDDS.cpp`
 before assuming it's applied.
 
+**4. Amplitude table file, `Time2Tics` and `RR2Word` margins (2026-11, Cal-V2 only).** See the
+README's "The amplitude table". What to know before touching it:
+- `Pow2AmpWord` has two paths. No second argument: the built-in 2015 table, word for word as
+  before (cubic pieces against power, floor). A table file: `AmpWordFromTable` (straight
+  lines against sqrt(power), nearest word). Keep the first path bit-identical; the lab decides
+  when a table file goes in, because every pi power has to be measured again then.
+- Freq-Scan-GUI's `ddsgui/ampword.py` is the same arithmetic in Python and `parse_table` there
+  refuses what `LoadAmpTable` refuses, with the same messages. Change the two together and run
+  `python3 firmware/tests/mac_check.py --lab <DDS day folder> --gui <Freq-Scan-GUI>`.
+- **The compiler can be built and run on the Mac** (`firmware/tests/`): x86_64 only - the tic
+  and frequency-word arithmetic is in long double, 80 bits on x86 as under MinGW and 64 bits on
+  Apple silicon, where the output differs in hundreds of words. With the `RR2Word` margin the
+  x86_64 build equals the lab's compiled output byte for byte (71 point files of 2026-11-17).
+- Floors of computed values are fragile here: `floor(tic * INTCLOCK - 1)` gave 298 or 299
+  depending on the compiler, and `floor(seconds * FIFOCLOCK / 8)` lost a tic for a third of the
+  lengths typed on the grid. Add a margin before a floor of something that should be whole.
+- The Cal project has none of this, on purpose (checked 2026-11-18): the Cal exe is called only by
+  DDSaddress / DDSarb / DDScool / DDSpostcool, whose files the camera program reads only in its
+  sort / sequence / addressing modes (cases 7, 19, 35 in CameraGUI_V3 panel.cpp), and every
+  camera record of November 2026 is case 3, where the DDS GUI plays everything through Cal-V2.
+  If those modes come back: Cal's conversions.cpp / conversions.h are identical to Cal-V2's at
+  ebabbaf, so copy the two files over and repeat the three edits in NewDDS.cpp (the second
+  argument, LoadAmpTable, `AmpTableTop()` in BadPulseRow) - do not copy NewDDS.cpp or pulse.h,
+  which differ (pulse types 12-17). The scripts would also have to pass the table file.
+- The RF chain is compiled by the same exe, so it follows the built-in (microwave) table unless
+  `amplitude_table_RF.txt` is put in place; `firmware/amplitude_table_RF.example.txt` and the
+  D1 - D3 bench sequences (Data/DDS amplitude tests) are the way to a measured one.
+
 ## Deployment / build gotchas (Windows + Eclipse CDT + MinGW)
 
 - **Eclipse project names now match the folder names** (Oct 2026). The run

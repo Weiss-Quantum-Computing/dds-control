@@ -135,6 +135,50 @@ After building, verify a new compiler produces byte-identical output to the one
 it replaces by running both on the same input and comparing the `RAW` files
 (`fc /b`), before deploying anything that drives hardware.
 
+## The amplitude table (Cal-V2, since November 2026)
+
+`NewDDS2-Cooling2.0-Cal-V2.exe <pulse file> [amplitude table file]`
+
+The compiler turns every power (W) into the AD9852's 12-bit amplitude word in `Pow2AmpWord`
+(`conversions.cpp`). Its built-in table (2015) tabulates the amplitude fraction against the
+*power* and starts at (0 W, 0), so below its first point, 16.2 mW, the amplitude comes out
+nearly proportional to the power where a linear chain needs the square root: a pulse typed at
+3 mW gets word 40 where the square-root law gives 88, and every Blackman or AFP pulse passes
+through that region in its wings. Its cubic pieces do not join smoothly either (the slope
+doubles at 66 mW) and the word is rounded down.
+
+- **Without the second argument nothing changes**: the built-in table, the same words. The
+  build of this source reproduces the lab's compiled files of 2026-11-17 byte for byte
+  (`firmware/tests/mac_check.py --lab`).
+- **With a table file** the conversion is: straight lines between the file's points against
+  sqrt(power), the word rounded to the nearest. `firmware/amplitude_table.example.txt` shows
+  the format (three required keyword lines, then `power_W fraction` points from `0 0`
+  upwards). A file that is not a table, or a power above its last point, refuses the compile
+  with exit 2; the built-in table is never used in its place in silence.
+- A table file changes every pulse's area (the example file, which holds the 2015 points
+  themselves, gives a 0.12 ms Blackman pi pulse 1.8 % more area and the 3 mW pulse 3 times
+  more), so **pi powers are calibrated again** when a file goes in or changes.
+- Freq-Scan-GUI passes `amplitude_table_MW.txt` / `amplitude_table_RF.txt` from the
+  DDScontrol folder when the chain's file is there, and models both conversions in
+  `ddsgui/ampword.py` (Preview shows the words before anything is compiled).
+- The RF DDS is compiled by the same program, so without `amplitude_table_RF.txt` it gets the
+  microwave chain's built-in table, compression correction included: against a square-root law
+  through the word at 1 W the RF word is 6 % high at 4.8 W and 18 % low at 10 mW.
+  `firmware/amplitude_table_RF.example.txt` is the table of a chain that is linear in the word
+  (two points), to be replaced by a measured one.
+- Only Cal-V2 has this. The Cal compiler (used by the addressing / arbitrary-pulse / cooling
+  scripts) still has the built-in table alone.
+
+Two rounding margins went in with it (`conversions.cpp`): `Time2Tics` played one step less
+than typed for about one in three lengths on a pulse type's own grid (6 us for a typed 7 us
+square pulse, 62 AFP tics for 0.504 ms); it now plays what is typed. None of the lengths in
+the lab's current sequences was affected. `RR2Word` gets the same margin so that every build
+writes the ramp-clock byte the lab's exe always has.
+
+`firmware/tests/mac_check.py` builds the compiler on a Mac (x86_64 through Rosetta, with
+stand-ins for `windows.h` and `NIDAQmx.h`) and runs these checks; see its docstring. It is a
+check of the source, not a substitute for `fc /b` against the previous exe on the lab PC.
+
 ## Notes
 
 - The `*-Cal*` compilers here include a performance fix that builds the pulse
